@@ -1,32 +1,61 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { Header } from '../header/Header';
+import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
-import Grid  from '@mui/material/Grid';
+import {Projects} from '../projects/Projects';
 import {selectCurrentView} from './mainFrameSlice';
+import {LoginForm} from '../login/Login';
+import { getToken, getUserFromToken, userIsGuest, userIsLogged } from '../login/loginServices';
+import { setLoggedIn, setToken } from '../login/loginSlice'
+import { changeUserName, changeUserImage } from '../header/headerSlice'
+
 
 function renderSwitch(view){
     switch(view){
         case 'projects':
-            return "Proyectos"
+            return <Projects />
         case 'settings':
             return "Ajustes"
+        case 'login':
+            return <LoginForm />
+    }
+}
+
+function checkCredentials(){
+    return function(dispatch){
+        const token = getToken();
+        if(token !== null){
+            if (!userIsLogged()){
+                dispatch(setLoggedIn(true));
+                dispatch(setToken(token));
+            }
+            if(userIsGuest()){
+                getUserFromToken(token).then(
+                    data => {
+                        if(data.user) dispatch(changeUserName(data.user.username))
+                        if(data.user_image) dispatch(changeUserImage(data.user_image))
+                    }
+                ); 
+            }
+        }
     }
 }
 
 export function MainFrame() {
     const view = useSelector(selectCurrentView);
+    const dispatch = useDispatch();
+    dispatch(checkCredentials());
+    
 
     return (
-        <Container>
+        <Box>
             <Header changeCurrentView />
-            <Grid container>
-                <Grid item xs={12}>
-                    {
-                        renderSwitch(view)
-                    }
-                </Grid>
-            </Grid>
-        </Container>
+            <Container maxWidth="xl">
+                {
+                    renderSwitch(view)
+                }
+            </Container>
+        </Box>
     );
 }

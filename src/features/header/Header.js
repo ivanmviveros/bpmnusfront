@@ -19,10 +19,7 @@ import ListItemText from '@mui/material/ListItemText';
 import ListItem from '@mui/material/ListItem';
 import { deepOrange } from '@mui/material/colors';
 
-import List from '@mui/material/List';
-
 import {changeCurrentView} from '../frame/mainFrameSlice'
-import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
     selectUserName,
@@ -56,6 +53,11 @@ export function Header(props) {
     const handleDrawerClose = () => {
       setOpen(false);
     };
+
+    const handleLoginClick = () => {
+        setAnchorEl(null);
+        dispatch(changeCurrentView('login'));
+    }
 
 
     const menuItems = [
@@ -133,7 +135,7 @@ export function Header(props) {
                         open={Boolean(anchorEl)}
                         onClose={handleClose}
                     >
-                        {userName === 'Guest' ? <MenuItem onClick={handleClose}>Login</MenuItem> : <MenuItem onClick={handleClose}>Profile</MenuItem> }
+                        {userName === 'Guest' ? <MenuItem onClick={handleLoginClick}>Login</MenuItem> : <MenuItem onClick={handleClose}>Profile</MenuItem> }
                         {userName === 'Guest' ? "" : <MenuItem onClick={handleClose}>My account</MenuItem> }
                         {userName === 'Guest' ? "" : <MenuItem onClick={handleClose}>Logout</MenuItem> }
                     </Menu>
