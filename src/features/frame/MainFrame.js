@@ -3,8 +3,12 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Header } from '../header/Header';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
+import useNotifier from 'useNotifier';
+import { views } from 'views';
 import {Projects} from '../projects/Projects';
-import {selectCurrentView} from './mainFrameSlice';
+import {selectCurrentView, selectBackdropOpen} from './mainFrameSlice';
 import {LoginForm} from '../login/Login';
 import { getToken, getUserFromToken, userIsGuest, userIsLogged } from '../login/loginServices';
 import { setLoggedIn, setToken } from '../login/loginSlice'
@@ -13,11 +17,11 @@ import { changeUserName, changeUserImage } from '../header/headerSlice'
 
 function renderSwitch(view){
     switch(view){
-        case 'projects':
+        case views.PROJECTS:
             return <Projects />
-        case 'settings':
+        case views.SETTINGS:
             return "Ajustes"
-        case 'login':
+        case views.LOGIN:
             return <LoginForm />
     }
 }
@@ -43,19 +47,29 @@ function checkCredentials(){
 }
 
 export function MainFrame() {
+    useNotifier();
     const view = useSelector(selectCurrentView);
+    const backdropOpen = useSelector(selectBackdropOpen);
     const dispatch = useDispatch();
     dispatch(checkCredentials());
     
 
     return (
-        <Box>
-            <Header changeCurrentView />
-            <Container maxWidth="xl">
-                {
-                    renderSwitch(view)
-                }
-            </Container>
-        </Box>
+        <div>
+            <Box>
+                <Header changeCurrentView />
+                <Container maxWidth="xl">
+                    {
+                        renderSwitch(view)
+                    }
+                </Container>
+            </Box>
+            <Backdrop
+                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                open={backdropOpen}
+            >
+                <CircularProgress color="inherit" />
+            </Backdrop>
+        </div>
     );
 }

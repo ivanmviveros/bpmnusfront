@@ -12,14 +12,22 @@ import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
 import { styled } from '@mui/material/styles';
+import { messages } from 'messages';
+import { views } from 'views';
+import { getProjectsList } from './tableServices';
 import { 
-    loadData,
-    setOrder,
+  enqueueSnackbar as enqueueSnackbarAction,
+  setBackdropOpen,
+  changeCurrentView
+} from 'features/frame/mainFrameSlice';
+import { 
+    setRecords,
     setOrderBy,
     setSelected,
     setPage,
     setDense,
     setRowsPerPage,
+    setRows,
     selectRows,
     selectSelected,
     selectOrder,
@@ -27,41 +35,12 @@ import {
     selectPage,
     selectDense,
     selectRowsPerPage,
-    selectLoading,
-    selectApiName
+    selectApiName,
+    selectRecords,
+    setLoading
 } from './tableSlice';
 import { EnhancedTableHead } from './TableHead';
 import { EnhancedTableToolbar } from './TableToolbar';
-
-function descendingComparator(a, b, orderBy) {
-  if (b[orderBy] < a[orderBy]) {
-    return -1;
-  }
-  if (b[orderBy] > a[orderBy]) {
-    return 1;
-  }
-  return 0;
-}
-
-function getComparator(order, orderBy) {
-  return order === 'desc'
-    ? (a, b) => descendingComparator(a, b, orderBy)
-    : (a, b) => -descendingComparator(a, b, orderBy);
-}
-
-// This method is created for cross-browser compatibility, if you don't
-// need to support IE11, you can use Array.prototype.sort() directly
-function stableSort(array, comparator) {
-  const stabilizedThis = array.map((el, index) => [el, index]);
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) {
-      return order;
-    }
-    return a[1] - b[1];
-  });
-  return stabilizedThis.map((el) => el[0]);
-}
 
 export default function EnhancedTable(props) {
     const order = useSelector(selectOrder)
@@ -70,21 +49,69 @@ export default function EnhancedTable(props) {
     const page = useSelector(selectPage)
     const dense = useSelector(selectDense)
     const rowsPerPage = useSelector(selectRowsPerPage)
-    const loading = useSelector(selectLoading)
+    const records = useSelector(selectRecords)
     const rows = useSelector(selectRows)
     const apiName = useSelector(selectApiName)
     const dispatch = useDispatch();
+    const enqueueSnackbar = (...args) => dispatch(enqueueSnackbarAction(...args));
+    const { headers, tittle } = props;
 
-    const { headers } = props;
+    const loadData = (data) => {
+      return async (dispatch) => {
+        dispatch(setBackdropOpen(true));
+        dispatch(setLoading('loading'))
+        const response = await getProjectsList(data)
+        .then(
+          (restult) => {
+            dispatch(setRows(restult.data.data))
+            dispatch(setRecords(restult.data.recordsFiltered))
+          }
+        )
+        .catch(
+          (error) => {
+            const status = error.response.status;
+            let message;
+            if (status === 401) message = messages.LOGIN_REQUIRED
+            else if (status === 500) message = messages.INTERNAL_SERVER_ERROR
+            else if (status === 403) message = message.ACCESS_DENIED
+            enqueueSnackbar({
+              key: new Date().getTime() + Math.random(),
+              message: message,
+              options: {
+                  variant: 'error'
+              },
+              dismissed: false
+            });
+            if (status === 401) dispatch(changeCurrentView(views.LOGIN))
+          }
+        )
+        .finally(
+          () => {
+            dispatch(setBackdropOpen(false));
+            dispatch(setLoading('idle'))
+          }
+        )
+      }
+    }
 
     React.useEffect(() => {
-        dispatch(loadData({ "start": page, "length": rowsPerPage, "search[value]": ""}))
+        dispatch(loadData({ 
+          "start": page * rowsPerPage,
+          "length": rowsPerPage,
+          "search[value]": "",
+          "order": order,
+          "orderBy": orderBy
+        }))
     }, [page, order, orderBy, rowsPerPage, apiName, dispatch]);
+    
 
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
-        setOrder(isAsc ? 'desc' : 'asc');
-        setOrderBy(property);
+        dispatch(setOrderBy({
+            "order": isAsc ? 'desc' : 'asc',
+            "orderBy": property
+          })
+        );
     };
 
     const handleSelectAllClick = (event) => {
@@ -131,8 +158,7 @@ export default function EnhancedTable(props) {
     const isSelected = (name) => selected.indexOf(name) !== -1;
 
   // Avoid a layout jump when reaching the last page with empty rows.
-    const emptyRows =
-        page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+    const emptyRows = Math.max(0, rowsPerPage - rows.length)
 
     const StyledTableRow = styled(TableRow)(({ theme }) => ({
       '&:nth-of-type(odd)': {
@@ -147,7 +173,7 @@ export default function EnhancedTable(props) {
     return (
         <Box sx={{ width: '100%' }}>
         <Paper sx={{ width: '100%', mb: 2 }}>
-            <EnhancedTableToolbar numSelected={selected.length} />
+            <EnhancedTableToolbar numSelected={selected.length} tittle={tittle} headers={headers} />
             <TableContainer>
             <Table
                 sx={{ minWidth: 750 }}
@@ -165,9 +191,7 @@ export default function EnhancedTable(props) {
                 <TableBody>
                 {/* if you don't need to support IE11, you can replace the `stableSort` call with:
                     rows.slice().sort(getComparator(order, orderBy)) */}
-                {stableSort(rows, getComparator(order, orderBy))
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((row, index) => {
+                {rows.map((row, index) => {
                     const isItemSelected = isSelected(row[headers[0].id]);
                     const labelId = `enhanced-table-checkbox-${index}`;
 
@@ -222,7 +246,7 @@ export default function EnhancedTable(props) {
             <TablePagination
             rowsPerPageOptions={[5, 10, 25]}
             component="div"
-            count={rows.length}
+            count={records}
             rowsPerPage={rowsPerPage}
             page={page}
             onPageChange={handleChangePage}

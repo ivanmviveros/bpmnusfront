@@ -18,7 +18,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import ListItem from '@mui/material/ListItem';
 import { deepOrange } from '@mui/material/colors';
-
+import { views } from 'views';
 import {changeCurrentView} from '../frame/mainFrameSlice'
 import { useSelector, useDispatch } from 'react-redux';
 import {
@@ -56,13 +56,13 @@ export function Header(props) {
 
     const handleLoginClick = () => {
         setAnchorEl(null);
-        dispatch(changeCurrentView('login'));
+        dispatch(changeCurrentView(views.LOGIN));
     }
 
 
     const menuItems = [
-        {label: "Proyectos", icon: <FolderIcon />, view: "projects"}, 
-        {label: "Ajustes", icon: <SettingsIcon />, view:"settings"}, 
+        {label: "Proyectos", icon: <FolderIcon />, view: views.PROJECTS}, 
+        {label: "Ajustes", icon: <SettingsIcon />, view: views.SETTINGS}, 
     ];
     return (
         <Box sx={{ flexGrow: 1 }}>

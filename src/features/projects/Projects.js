@@ -13,24 +13,52 @@ export function Projects(props) {
             numeric: false,
             disablePadding: true,
             label: 'Código',
+            filterable: true,
+            filter_details: {
+                type: "Text", //Text, Range, Picker
+                options: {
+                    "data_type": "number" //Min, Max range, picker_list, data_type (number or text)
+                }
+            }
         },
         {
             id: 'name',
             numeric: false,
             disablePadding: true,
             label: 'Nombre',
+            filterable: true,
+            filter_details: {
+                type: "Text", 
+                options: {
+                    "data_type": "text"
+                }
+            }
         },
         {
             id: 'desc',
             numeric: false,
             disablePadding: false,
             label: 'Descripción',
+            filterable: true,
+            filter_details: {
+                type: "Text", 
+                options: {
+                    "data_type": "text"
+                }
+            }
         },
         {
             id: 'creation_date',
             numeric: false,
             disablePadding: false,
             label: 'Fecha de creación',
+            filterable: true,
+            filter_details: {
+                type: "Range", 
+                options: {
+                    "data_type": "date"
+                }
+            }
         },
     ];
     
@@ -39,8 +67,8 @@ export function Projects(props) {
     
     return (
         <Grid container>
-            <Grid item xs={12}>
-                <EnhancedTable headers={HEADERS} />
+            <Grid item xs={12} sx={{ my: 2 }}>
+                <EnhancedTable headers={HEADERS} tittle="Proyectos" />
             </Grid>
         </Grid>
     )

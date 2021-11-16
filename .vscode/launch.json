@@ -1,0 +1,39 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "command": "npm start",
+            "name": "npm",
+            "request": "launch",
+            "type": "node-terminal"
+        },
+        {
+            "type": "firefox",
+            "request": "launch",
+            "reAttach": true,
+            "name": "firefox",
+            "url": "http://localhost:3000",
+            "webRoot": "${workspaceFolder}"
+        },
+        {
+            "name": "django",
+            "type": "python",
+            "request": "launch",
+            "program": "C:\\Users\\Edgar\\dev\\bpmnhu\\manage.py",
+            "python": "C:\\Users\\Edgar\\dev\\bpmnhu\\env\\Scripts\\python",
+            "args": [
+                "runserver"
+            ],
+            "django": true
+        }
+    ],
+    "compounds": [
+        {
+          "name": "Server/Client",
+          "configurations": ["django", "npm", "firefox"]
+        }
+    ]
+}

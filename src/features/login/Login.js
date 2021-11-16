@@ -8,11 +8,13 @@ import IconButton from '@mui/material/IconButton';
 import Grid from '@mui/material/Grid';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import AccountCircle from '@mui/icons-material/AccountCircle';
 import FormHelperText from '@mui/material/FormHelperText';
 import Button from '@mui/material/Button';
+import { setBackdropOpen, changeCurrentView } from 'features/frame/mainFrameSlice';
 import { tryLogin } from './loginServices';
-
+import { 
+    enqueueSnackbar as enqueueSnackbarAction
+} from 'features/frame/mainFrameSlice';
 
 import { 
     setLoading, setLoggedIn, setToken
@@ -21,6 +23,7 @@ import { useDispatch } from 'react-redux';
 import { changeUserName } from '../header/headerSlice';
 
 export function LoginForm(){
+    const enqueueSnackbar = (...args) => dispatch(enqueueSnackbarAction(...args));
     const dispatch = useDispatch();
     const [values, setValues] = React.useState({
         email: '',
@@ -30,6 +33,7 @@ export function LoginForm(){
 
     const login = (data) => {
         dispatch(setLoading('loading'));
+        dispatch(setBackdropOpen(true));
         return async (dispatch) => {
             const response = await tryLogin(data)
             .then(
@@ -44,16 +48,33 @@ export function LoginForm(){
                         dispatch(changeUserName(username))
                         dispatch(setLoggedIn(true))
                         dispatch(setToken(token))
+                        enqueueSnackbar({
+                            key: new Date().getTime() + Math.random(),
+                            message: `Ingreso correcto, bienvenido ${username}`,
+                            options: {
+                                variant: 'success'
+                            },
+                            dismissed: false
+                        });
+                        dispatch(changeCurrentView("projects"))
                     }
                 }
             )
             .catch(
                 (error) => {
-                    console.log(error);
+                    enqueueSnackbar({
+                        key: new Date().getTime() + Math.random(),
+                        message: `Nombre de usuario o contraseña incorrectos`,
+                        options: {
+                            variant: 'error'
+                        },
+                        dismissed: false
+                    });
                 }
             )
             .finally(
                 () => {
+                    dispatch(setBackdropOpen(false));
                     dispatch(setLoading('idle'));
                 }
             )
@@ -86,7 +107,7 @@ export function LoginForm(){
             <Grid container spacing={1}>
                 <Grid item xs={12} md={6}>
                     <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined">
-                    <InputLabel htmlFor="outlined-adornment-email">Email    </InputLabel>
+                        <InputLabel htmlFor="outlined-adornment-email">Email</InputLabel>
                         <OutlinedInput
                             id="outlined-adornment-email"
                             type={'text'}
