@@ -16,16 +16,9 @@ const initialState = {
     rowsPerPage: 5,
     loading: 'idle',
     apiName: "",
-    records: 0
+    records: 0,
+    filter: 0,
 };
-
-export const loadData = createAsyncThunk(
-  'table/getProjectsList',
-  async (query) => {
-    const response = await getProjectsList(query)
-    return response.data;
-  }
-);
 
 export const tableSlice = createSlice({
     name: 'table',
@@ -60,24 +53,12 @@ export const tableSlice = createSlice({
         state.records  = action.payload;
       },
       setLoading: (state, action) => {
-        state.records  = action.payload;
+        state.loading  = action.payload;
+      },
+      setFilter: (state, action) => {
+        state.filter  = action.payload;
       }
-    },
-    extraReducers: (builder) => {
-      builder
-        .addCase(loadData.pending, (state) => {
-          state.loading = 'loading';
-        })
-        .addCase(loadData.fulfilled, (state, action) => {
-          state.loading = 'idle';
-          state.rows = action.payload.data;
-          state.records = action.payload.recordsFiltered;
-        })
-        .addCase(loadData.rejected, (state, action) => {
-          state.loading = 'idle';
-        })
-        .addDefaultCase((state, action) => {})
-    },
+    }
 });
 
 export const {
@@ -91,7 +72,8 @@ export const {
     setRowsPerPage,
     setRecords,
     setLoading,
-    setApiName
+    setApiName,
+    setFilter
 } = tableSlice.actions;
 
 export const selectHeaders = (state) => state.table.headers;
@@ -105,5 +87,6 @@ export const selectRowsPerPage = (state) => state.table.rowsPerPage;
 export const selectLoading = (state) => state.table.loading;
 export const selectApiName = (state) => state.table.apiName;
 export const selectRecords = (state) => state.table.records;
+export const selectFilter = (state) => state.table.filter;
 
 export default tableSlice.reducer;

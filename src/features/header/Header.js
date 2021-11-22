@@ -19,12 +19,16 @@ import ListItemText from '@mui/material/ListItemText';
 import ListItem from '@mui/material/ListItem';
 import { deepOrange } from '@mui/material/colors';
 import { views } from 'views';
-import {changeCurrentView} from '../frame/mainFrameSlice'
+import {changeCurrentView} from '../frame/mainFrameSlice';
 import { useSelector, useDispatch } from 'react-redux';
+import { 
+    setLoggedIn, setToken
+} from 'features/login/loginSlice';
 import {
     selectUserName,
     selectTittle,
-    selectUserImage
+    selectUserImage,
+    changeUserName
 } from './headerSlice';
 
 
@@ -59,6 +63,14 @@ export function Header(props) {
         dispatch(changeCurrentView(views.LOGIN));
     }
 
+    const handleLogoutClick = () => {
+        document.cookie = "auth=;expires=Thu, 01 Jan 1970 00:00:01 GMT";
+        setAnchorEl(null);
+        dispatch(changeUserName('Guest'))
+        dispatch(setLoggedIn(false))
+        dispatch(setToken(''))
+        dispatch(changeCurrentView(views.LOGIN))
+    }
 
     const menuItems = [
         {label: "Proyectos", icon: <FolderIcon />, view: views.PROJECTS}, 
@@ -137,7 +149,7 @@ export function Header(props) {
                     >
                         {userName === 'Guest' ? <MenuItem onClick={handleLoginClick}>Login</MenuItem> : <MenuItem onClick={handleClose}>Profile</MenuItem> }
                         {userName === 'Guest' ? "" : <MenuItem onClick={handleClose}>My account</MenuItem> }
-                        {userName === 'Guest' ? "" : <MenuItem onClick={handleClose}>Logout</MenuItem> }
+                        {userName === 'Guest' ? "" : <MenuItem onClick={handleLogoutClick}>Logout</MenuItem> }
                     </Menu>
                 </Toolbar>
             </AppBar>

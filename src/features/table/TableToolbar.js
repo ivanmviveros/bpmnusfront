@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
 import { alpha } from '@mui/material/styles';
 import Toolbar from '@mui/material/Toolbar';
@@ -15,20 +16,70 @@ import Popper from '@mui/material/Popper';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
-import { Projects } from '../projects/Projects';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import { setHeaders, selectHeaders, setFilter, selectFilter } from 'features/table/tableSlice';
 import MobileDatePicker from '@mui/lab/MobileDatePicker';
 
 export const EnhancedTableToolbar = (props) => {
-    const { numSelected, tittle, headers } = props;
-    const [anchorEl, setAnchorEl] = React.useState(null);
+  const headers = useSelector(selectHeaders)
+  const filter = useSelector(selectFilter)
+  const dispatch = useDispatch();
+  const { numSelected, tittle } = props;
+  const [anchorEl, setAnchorEl] = React.useState(null);
 
-    const handleClick = (event) => {
-      anchorEl ? setAnchorEl(null) : setAnchorEl(event.currentTarget);
-    };
+  const handleClickFilterIcon = (event) => {
+    anchorEl ? setAnchorEl(null) : setAnchorEl(event.currentTarget);
+  };
 
-    const handleClose = () => {
-      setAnchorEl(null);
+  const handleClickFilterButton = () => {
+    dispatch(setFilter(filter + 1))
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const changeFilter = (id, input) => {
+    return (event) => {
+      dispatch(setHeaders(
+        headers.map(
+          (element) => {
+            if (element.id === id) return {
+              ...element,
+              filter_details: {
+                ...element.filter_details,
+                [input]: (
+                  element.filter_details.options.data_type === 'number'
+                ) ? 
+                (/^[0-9]*$/.test(event.target.value) ? event.target.value :  element.filter_details[input]) 
+                : event.target.value
+              }
+            };
+            return element;
+          }
+        )
+      ));
     };
+  }
+
+  const handleClean = () => {
+    dispatch(setHeaders(
+      headers.map(
+        (element) => {
+          return {
+            ...element,
+            filter_details: {
+              ...element.filter_details,
+              value: '',
+              value2: '',
+            }
+          };
+        }
+      )
+    ));
+  };
+
 
   const open = Boolean(anchorEl);
   const id = open ? 'simple-popover' : undefined;
@@ -76,8 +127,8 @@ export const EnhancedTableToolbar = (props) => {
           }) && 
           <div>
             <Tooltip title="Filtros">
-              <IconButton>
-                <FilterListIcon onClick={handleClick} />
+              <IconButton onClick={handleClickFilterIcon}>
+                <FilterListIcon/>
               </IconButton>
             </Tooltip>       
             <Popper
@@ -88,21 +139,22 @@ export const EnhancedTableToolbar = (props) => {
               placement={'bottom-end'}
             >
               <Box sx={{ flexGrow: 1, bgcolor: 'background.paper' }}>
-                <Grid container sx={{width: 500}}>
+                <Grid container sx={{width: 500}} key={"GridFilter"}>
                 {headers.map(
-                  (header) => {
+                  (header, index) => {
                     if(header.filterable){
                       switch(header.filter_details.type){
                         case "Text":
                           return(
-                            <Grid item xs={11}>
+                            <Grid item xs={11} key={"h" + index}>
                               <FormControl fullWidth sx={{ m: 1}} variant="outlined">
                                 <InputLabel size="small" htmlFor={header.id}>{header.label}</InputLabel>
                                 <OutlinedInput
                                   id={header.id}
                                   label={header.label} variant="outlined" 
-                                  type={header.filter_details.type}
+                                  value={header.filter_details.value}
                                   size="small"
+                                  onChange={changeFilter(header.id, 'value')}
                                 />
                               </FormControl>
                             </Grid>
@@ -110,52 +162,100 @@ export const EnhancedTableToolbar = (props) => {
                         case "Range":
                           return (header.filter_details.options.data_type === 'date') ?
                             [
-                            <Grid item xs={6} >
+                            <Grid item xs={6} key={"h" + index}>
                               <FormControl sx={{ m: 1}} variant="outlined">
                                 <MobileDatePicker
                                   label="Desde"
                                   inputFormat="MM/dd/yyyy"
                                   renderInput={(params) => <TextField {...params} />}
+                                  value={header.filter_details.value || null}
+                                  onChange={(newValue) => {
+                                    changeFilter(header.id, 'value')({target:{value:newValue.toString()}})
+                                  }}
                                 />
                               </FormControl>
                             </Grid>,
-                            <Grid item xs={6}>
+                            <Grid item xs={6} key={"h2" + index}>
                               <FormControl sx={{ m: 1}} variant="outlined">
                                 <MobileDatePicker
                                   label="Hasta"
                                   inputFormat="MM/dd/yyyy"
                                   renderInput={(params) => <TextField {...params} />}
+                                  value={header.filter_details.value2 || null}
+                                  onChange={(newValue) => {
+                                    changeFilter(header.id, 'value2')({target:{value:newValue.toString()}})
+                                  }}
                                 />
                               </FormControl>
                             </Grid> ] :
                           [
-                              <Grid item xs={6}>
+                              <Grid item xs={6} key={"h" + index}>
+                                <InputLabel size="small" htmlFor={"filter1" + header.id}>{header.label}</InputLabel>
                                 <TextField
-                                  id={"filter" + header.id}
+                                  id={"filter1" + header.id}
                                   label={header.label} variant="outlined" 
                                   type={header.filter_details.type}
+                                  value={header.filter_details.value}
+                                  onChange={changeFilter(header.id, 'value')}
                                   size="small"
                                 />
                               </Grid> ,
-                              <Grid item xs={6}>
+                              <Grid item xs={6} key={"h2" + index}>
+                                <InputLabel size="small" htmlFor={"filter2" + header.id}>{header.label}</InputLabel>
                                 <TextField
-                                  id={"filter" + header.id}
+                                  id={"filter2" + header.id}
                                   label={header.label} variant="outlined" 
                                   type={header.filter_details.type} 
+                                  value={header.filter_details.value2}
+                                  onChange={changeFilter(header.id, 'value2')}
                                   size="small"
                                 />
                               </Grid>
                           ]
+                        case 'Picker':
+                          return (
+                            <Grid item xs={11} key={"pick" + index}>
+                              <FormControl fullWidth sx={{ m: 1}} variant="outlined">
+                                <InputLabel htmlFor={header.id}>Age</InputLabel>
+                                  <Select
+                                    id={header.id}
+                                    value={header.filter_details.value}
+                                    label={header.label} 
+                                    onChange={changeFilter(header.id, 'value')}
+                                  >
+                                    {header.filter_details.options.picker_list.map(
+                                      (pick, index) => {
+                                        return <MenuItem value={pick.key} key={'mi' + index}>{pick.label}</MenuItem>
+                                      }
+                                    )}
+                                  </Select>
+                              </FormControl>
+                            </Grid>
+                          )
                         default:
                           return;
                       }
                     } 
                   }
                 )}
-                  <Grid item xs={12}>
+                  <Grid item xs={4}>
                     <FormControl sx={{ m: 1}} >
-                      <Button variant="outlined">
+                      <Button variant="outlined" onClick={handleClickFilterButton}>
                         Filtrar
+                      </Button>
+                    </FormControl>
+                  </Grid>  
+                  <Grid item xs={4}>
+                    <FormControl sx={{ m: 1}} >
+                      <Button variant="outlined" onClick={handleClean}>
+                        Limpiar
+                      </Button>
+                    </FormControl>
+                  </Grid>  
+                  <Grid item xs={4}>
+                    <FormControl sx={{ m: 1}} >
+                      <Button variant="outlined" onClick={handleClose}>
+                        Cerrar
                       </Button>
                     </FormControl>
                   </Grid>  
@@ -172,22 +272,24 @@ export const EnhancedTableToolbar = (props) => {
     numSelected: PropTypes.number.isRequired,
     headers: PropTypes.arrayOf(
       PropTypes.shape({
-        id: PropTypes.number.isRequired,
+        id: PropTypes.string.isRequired,
         numeric: PropTypes.bool.isRequired,
         disablePadding: PropTypes.bool.isRequired,
         label: PropTypes.string.isRequired,
         filterable: PropTypes.bool.isRequired,
-        options: PropTypes.shape({
+        filter_details: PropTypes.shape({
           type: PropTypes.oneOf(['Text', 'Range', 'Picker']).isRequired,
-          filter_details: PropTypes.shape({
-            data_type: PropTypes.oneOf(['number', 'text']).isRequired,
+          options: PropTypes.shape({
+            data_type: PropTypes.oneOf(['number', 'text', 'date']).isRequired,
             min_range: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-            max_range: PropTypes.number,
-            options: PropTypes.shape({
-              key: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
-              value: PropTypes.string.isRequired
+            max_range: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+            picker_list: PropTypes.shape({
+              value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+              label: PropTypes.string.isRequired,
             })
-          }).isRequired
+          }).isRequired,
+          value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+          value2: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
         })
       })
     )

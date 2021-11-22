@@ -35,12 +35,36 @@ function checkCredentials(){
                 dispatch(setToken(token));
             }
             if(userIsGuest()){
-                getUserFromToken(token).then(
+                getUserFromToken(token)
+                .then(
                     data => {
-                        if(data.user) dispatch(changeUserName(data.user.username))
-                        if(data.user_image) dispatch(changeUserImage(data.user_image))
+                        if(data){
+                            if(data.user) dispatch(changeUserName(data.user.username))
+                            if(data.user_image) dispatch(changeUserImage(data.user_image))
+                        }       
                     }
-                ); 
+                )
+                .catch(
+                    error => {
+                        if (error.response){
+                            const status = error.response.status;
+                            let message;
+                            if (status === 500) message = messages.INTERNAL_SERVER_ERROR
+                            enqueueSnackbar({
+                                key: new Date().getTime() + Math.random(),
+                                message: message,
+                                options: {
+                                    variant: 'error'
+                                },
+                                dismissed: false
+                            });
+                            if (status === 401) dispatch(changeCurrentView(views.LOGIN))
+                        }
+                        else {
+                            console.log(error)
+                        }
+                    }
+                )
             }
         }
     }

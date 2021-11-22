@@ -17,8 +17,10 @@ export function Projects(props) {
             filter_details: {
                 type: "Text", //Text, Range, Picker
                 options: {
-                    "data_type": "number" //Min, Max range, picker_list, data_type (number or text)
-                }
+                    "data_type": "number" //Min, Max range, picker_list, data_type (number, text, date)
+                },
+                value: '',
+                value2: ''
             }
         },
         {
@@ -28,10 +30,22 @@ export function Projects(props) {
             label: 'Nombre',
             filterable: true,
             filter_details: {
-                type: "Text", 
+                type: "Picker", 
                 options: {
-                    "data_type": "text"
-                }
+                    "data_type": "text",
+                    picker_list: [
+                        {
+                            key: 1,
+                            label: '1'
+                        },
+                        {
+                            key: 2,
+                            label: '2'
+                        }
+                    ]
+                },
+                value: '',
+                value2: ''
             }
         },
         {
@@ -44,7 +58,9 @@ export function Projects(props) {
                 type: "Text", 
                 options: {
                     "data_type": "text"
-                }
+                },
+                value: '',
+                value2: ''
             }
         },
         {
@@ -57,18 +73,22 @@ export function Projects(props) {
                 type: "Range", 
                 options: {
                     "data_type": "date"
-                }
+                },
+                value: '',
+                value2: ''
             }
         },
     ];
     
-    dispatch(setApiName(MODULE_NAME));
-    dispatch(setHeaders(HEADERS));
+    React.useEffect(() => {
+        dispatch(setApiName(MODULE_NAME));
+        dispatch(setHeaders(HEADERS));
+    }, []);
     
     return (
         <Grid container>
             <Grid item xs={12} sx={{ my: 2 }}>
-                <EnhancedTable headers={HEADERS} tittle="Proyectos" />
+                <EnhancedTable tittle="Proyectos" />
             </Grid>
         </Grid>
     )

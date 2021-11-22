@@ -37,10 +37,13 @@ import {
     selectRowsPerPage,
     selectApiName,
     selectRecords,
-    setLoading
+    selectHeaders,
+    setLoading,
+    selectFilter
 } from './tableSlice';
 import { EnhancedTableHead } from './TableHead';
 import { EnhancedTableToolbar } from './TableToolbar';
+import { fi } from 'date-fns/locale';
 
 export default function EnhancedTable(props) {
     const order = useSelector(selectOrder)
@@ -52,9 +55,11 @@ export default function EnhancedTable(props) {
     const records = useSelector(selectRecords)
     const rows = useSelector(selectRows)
     const apiName = useSelector(selectApiName)
+    const headers = useSelector(selectHeaders)
+    const filter = useSelector(selectFilter)
     const dispatch = useDispatch();
     const enqueueSnackbar = (...args) => dispatch(enqueueSnackbarAction(...args));
-    const { headers, tittle } = props;
+    const { tittle } = props;
 
     const loadData = (data) => {
       return async (dispatch) => {
@@ -69,20 +74,25 @@ export default function EnhancedTable(props) {
         )
         .catch(
           (error) => {
-            const status = error.response.status;
-            let message;
-            if (status === 401) message = messages.LOGIN_REQUIRED
-            else if (status === 500) message = messages.INTERNAL_SERVER_ERROR
-            else if (status === 403) message = message.ACCESS_DENIED
-            enqueueSnackbar({
-              key: new Date().getTime() + Math.random(),
-              message: message,
-              options: {
-                  variant: 'error'
-              },
-              dismissed: false
-            });
-            if (status === 401) dispatch(changeCurrentView(views.LOGIN))
+            if (error.response){
+              const status = error.response.status;
+              let message;
+              if (status === 401) message = messages.LOGIN_REQUIRED
+              else if (status === 500) message = messages.INTERNAL_SERVER_ERROR
+              else if (status === 403) message = messages.ACCESS_DENIED
+              enqueueSnackbar({
+                key: new Date().getTime() + Math.random(),
+                message: message,
+                options: {
+                    variant: 'error'
+                },
+                dismissed: false
+              });
+              if (status === 401) dispatch(changeCurrentView(views.LOGIN))
+            }
+            else {
+              console.log('Aqui imprimo el error')
+            }
           }
         )
         .finally(
@@ -94,15 +104,31 @@ export default function EnhancedTable(props) {
       }
     }
 
+    const getFilters = (headers) => {
+      return headers.map(
+        (element) => {
+          const filter = { ...element.filter_details};
+          filter.id = element.id;
+          if (element.filter_details.options.data_type === 'date') {
+            if (filter.value !== '')
+              filter.value = new  Date(filter.value).toISOString().split('T')[0]
+            if (filter.value2 !== '')
+              filter.value2 = new  Date(filter.value2).toISOString().split('T')[0]
+          }
+          return filter;
+        }
+      )
+    }
+
     React.useEffect(() => {
         dispatch(loadData({ 
           "start": page * rowsPerPage,
           "length": rowsPerPage,
-          "search[value]": "",
           "order": order,
-          "orderBy": orderBy
+          "orderBy": orderBy,
+          "filters": getFilters(headers)
         }))
-    }, [page, order, orderBy, rowsPerPage, apiName, dispatch]);
+    }, [page, order, orderBy, rowsPerPage, apiName, filter, dispatch]);
     
 
     const handleRequestSort = (event, property) => {
@@ -173,7 +199,7 @@ export default function EnhancedTable(props) {
     return (
         <Box sx={{ width: '100%' }}>
         <Paper sx={{ width: '100%', mb: 2 }}>
-            <EnhancedTableToolbar numSelected={selected.length} tittle={tittle} headers={headers} />
+            <EnhancedTableToolbar numSelected={selected.length} tittle={tittle} />
             <TableContainer>
             <Table
                 sx={{ minWidth: 750 }}
@@ -202,7 +228,7 @@ export default function EnhancedTable(props) {
                         role="checkbox"
                         aria-checked={isItemSelected}
                         tabIndex={-1}
-                        key={row[headers[0].id]}
+                        key={index}
                         selected={isItemSelected}
                         >
                         <TableCell padding="checkbox">
@@ -214,17 +240,21 @@ export default function EnhancedTable(props) {
                             }}
                             />
                         </TableCell>
-                        {headers.map( (cell, index) => {
-                          return index ==0 ? 
+                        {headers.map( (cell, index2) => {
+                          return index2 ==0 ? 
                           <TableCell
                               component="th"
                               id={labelId}
                               scope="row"
                               padding="none"
+                              key= {'' + index + '-' + index2}
                           >
                             {row[cell.id]}
                           </TableCell> :
-                          <TableCell align="left">
+                          <TableCell 
+                            align="left"
+                            key= {'' + index + '-' + index2}
+                          >
                             {row[cell.id]}
                           </TableCell>
                         })}

@@ -20,5 +20,13 @@ export const getProjectsList = (data) => {
   const token = getToken();
   const url = `${API_URL}/${APP}/data_list`;
   const headers = { Authorization: `Bearer ${token}` };
-  return axios.post(url, data, { headers: headers});
+  axios.interceptors.response.use((response) => response, (error) => {
+    return Promise.reject(error)
+  })
+  try {
+    return axios.post(url, data, { headers: headers});
+  }
+  catch{
+    return Promise.reject('A network error occurred. ')
+  }
 };

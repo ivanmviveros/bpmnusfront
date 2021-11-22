@@ -16,7 +16,8 @@
             "reAttach": true,
             "name": "firefox",
             "url": "http://localhost:3000",
-            "webRoot": "${workspaceFolder}"
+            "webRoot": "${workspaceFolder}",
+            "profile": "debug"
         },
         {
             "name": "django",
