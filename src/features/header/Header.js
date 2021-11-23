@@ -147,8 +147,9 @@ export function Header(props) {
                         open={Boolean(anchorEl)}
                         onClose={handleClose}
                     >
-                        {userName === 'Guest' ? <MenuItem onClick={handleLoginClick}>Login</MenuItem> : <MenuItem onClick={handleClose}>Profile</MenuItem> }
-                        {userName === 'Guest' ? "" : <MenuItem onClick={handleClose}>My account</MenuItem> }
+                        {userName === 'Guest' ? 
+                            <MenuItem onClick={handleLoginClick}>Login</MenuItem> : 
+                            <MenuItem onClick={handleClose}>Profile</MenuItem> }
                         {userName === 'Guest' ? "" : <MenuItem onClick={handleLogoutClick}>Logout</MenuItem> }
                     </Menu>
                 </Toolbar>

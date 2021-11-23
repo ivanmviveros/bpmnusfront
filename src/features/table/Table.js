@@ -12,13 +12,11 @@ import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
 import { styled } from '@mui/material/styles';
-import { messages } from 'messages';
-import { views } from 'views';
+import { errorHandleDefault } from 'utils';
 import { getProjectsList } from './tableServices';
 import { 
   enqueueSnackbar as enqueueSnackbarAction,
-  setBackdropOpen,
-  changeCurrentView
+  setBackdropOpen
 } from 'features/frame/mainFrameSlice';
 import { 
     setRecords,
@@ -43,7 +41,6 @@ import {
 } from './tableSlice';
 import { EnhancedTableHead } from './TableHead';
 import { EnhancedTableToolbar } from './TableToolbar';
-import { fi } from 'date-fns/locale';
 
 export default function EnhancedTable(props) {
     const order = useSelector(selectOrder)
@@ -73,27 +70,7 @@ export default function EnhancedTable(props) {
           }
         )
         .catch(
-          (error) => {
-            if (error.response){
-              const status = error.response.status;
-              let message;
-              if (status === 401) message = messages.LOGIN_REQUIRED
-              else if (status === 500) message = messages.INTERNAL_SERVER_ERROR
-              else if (status === 403) message = messages.ACCESS_DENIED
-              enqueueSnackbar({
-                key: new Date().getTime() + Math.random(),
-                message: message,
-                options: {
-                    variant: 'error'
-                },
-                dismissed: false
-              });
-              if (status === 401) dispatch(changeCurrentView(views.LOGIN))
-            }
-            else {
-              console.log('Aqui imprimo el error')
-            }
-          }
+          (error) => errorHandleDefault(error, enqueueSnackbar)
         )
         .finally(
           () => {
@@ -165,6 +142,7 @@ export default function EnhancedTable(props) {
             selected.slice(selectedIndex + 1),
           );
         }
+        console.log(newSelected);
         dispatch(setSelected(newSelected));
     };
 
@@ -223,13 +201,13 @@ export default function EnhancedTable(props) {
 
                     return (
                         <StyledTableRow
-                        hover
-                        onClick={(event) => handleClick(event, row[headers[0].id])}
-                        role="checkbox"
-                        aria-checked={isItemSelected}
-                        tabIndex={-1}
-                        key={index}
-                        selected={isItemSelected}
+                          hover
+                          onClick={(event) => handleClick(event, row[headers[0].id])}
+                          role="checkbox"
+                          aria-checked={isItemSelected}
+                          tabIndex={-1}
+                          key={index}
+                          selected={isItemSelected}
                         >
                         <TableCell padding="checkbox">
                             <Checkbox

@@ -17,16 +17,32 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import { setHeaders, selectHeaders, setFilter, selectFilter } from 'features/table/tableSlice';
 import MobileDatePicker from '@mui/lab/MobileDatePicker';
+import MenuItem from '@mui/material/MenuItem';
+import { errorHandleDefault } from 'utils';
+import { 
+  enqueueSnackbar as enqueueSnackbarAction,
+  setBackdropOpen
+} from 'features/frame/mainFrameSlice';
+import { 
+  setHeaders,
+  selectHeaders,
+  setFilter,
+  selectFilter,
+  selectSelected,
+  setLoading
+ } from 'features/table/tableSlice';
+import { deleteBulk } from './tableServices';
+
 
 export const EnhancedTableToolbar = (props) => {
   const headers = useSelector(selectHeaders)
   const filter = useSelector(selectFilter)
+  const selected = useSelector(selectSelected)
   const dispatch = useDispatch();
   const { numSelected, tittle } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const enqueueSnackbar = (...args) => dispatch(enqueueSnackbarAction(...args));
 
   const handleClickFilterIcon = (event) => {
     anchorEl ? setAnchorEl(null) : setAnchorEl(event.currentTarget);
@@ -63,6 +79,40 @@ export const EnhancedTableToolbar = (props) => {
     };
   }
 
+  const deleteBulkAction = () => {
+    return async (dispatch) => {
+      dispatch(setBackdropOpen(true));
+      dispatch(setLoading('loading'))
+      const response = await deleteBulk(selected)
+      .then(
+        (restult) => {
+          enqueueSnackbar({
+            key: new Date().getTime() + Math.random(),
+            message: `Se eliminaron los registros ${restult.data.objects_deleted}`,
+            options: {
+                variant: 'success'
+            },
+            dismissed: false
+          });
+        }
+      )
+      .catch(
+        (error) => errorHandleDefault(error, enqueueSnackbar)
+      )
+      .finally(
+        () => {
+          dispatch(setBackdropOpen(false));
+          dispatch(setLoading('idle'))
+        }
+      )
+    }
+  }
+
+  const handleDelete = () => {
+    dispatch(deleteBulkAction());
+  }
+
+  
   const handleClean = () => {
     dispatch(setHeaders(
       headers.map(
@@ -118,7 +168,7 @@ export const EnhancedTableToolbar = (props) => {
         {numSelected > 0 ? (
           <Tooltip title="Delete">
             <IconButton>
-              <DeleteIcon />
+              <DeleteIcon onClick={handleDelete} />
             </IconButton>
           </Tooltip>
         ) : (
