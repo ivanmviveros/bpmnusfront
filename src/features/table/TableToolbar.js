@@ -10,6 +10,7 @@ import Tooltip from '@mui/material/Tooltip';
 import Box from '@mui/material/Box';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 import Grid  from '@mui/material/Grid';
 import Button  from '@mui/material/Button';
 import Popper from '@mui/material/Popper';
@@ -164,7 +165,11 @@ export const EnhancedTableToolbar = (props) => {
             {tittle}
           </Typography>
         )}
-  
+        <Tooltip title="Add">
+          <IconButton>
+            <AddCircleIcon onClick={handleDelete} />
+          </IconButton>
+        </Tooltip>
         {numSelected > 0 ? (
           <Tooltip title="Delete">
             <IconButton>

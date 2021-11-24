@@ -1,19 +1,7 @@
 import axios from "axios";
+import { API_URL, getToken } from "utils";
 
-const API_URL = "http://localhost:8000";
 const APP = "projects";
-
-const getCookie = (name) => {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(';').shift();
-  return null;
-}
-
-export const getToken = () => {
-  const cookie = getCookie('auth');
-  return cookie
-}
 
 export const getProjectsList = (data) => {
   const token = getToken();
