@@ -23,7 +23,8 @@ import MenuItem from '@mui/material/MenuItem';
 import { errorHandleDefault } from 'utils';
 import { 
   enqueueSnackbar as enqueueSnackbarAction,
-  setBackdropOpen
+  setBackdropOpen,
+  changeCurrentView
 } from 'features/frame/mainFrameSlice';
 import { 
   setHeaders,
@@ -34,6 +35,7 @@ import {
   setLoading
  } from 'features/table/tableSlice';
 import { deleteBulk } from './tableServices';
+import { resetState } from 'features/projects/projectFormSlice';
 
 
 export const EnhancedTableToolbar = (props) => {
@@ -41,7 +43,7 @@ export const EnhancedTableToolbar = (props) => {
   const filter = useSelector(selectFilter)
   const selected = useSelector(selectSelected)
   const dispatch = useDispatch();
-  const { numSelected, tittle } = props;
+  const { numSelected, tittle, addView } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const enqueueSnackbar = (...args) => dispatch(enqueueSnackbarAction(...args));
 
@@ -98,7 +100,7 @@ export const EnhancedTableToolbar = (props) => {
         }
       )
       .catch(
-        (error) => errorHandleDefault(error, enqueueSnackbar)
+        (error) => errorHandleDefault(error, enqueueSnackbar, dispatch)
       )
       .finally(
         () => {
@@ -111,6 +113,11 @@ export const EnhancedTableToolbar = (props) => {
 
   const handleDelete = () => {
     dispatch(deleteBulkAction());
+  }
+
+  const handleAdd = () => {
+    dispatch(resetState(1));
+    dispatch(changeCurrentView(addView));
   }
 
   
@@ -167,7 +174,7 @@ export const EnhancedTableToolbar = (props) => {
         )}
         <Tooltip title="Add">
           <IconButton>
-            <AddCircleIcon onClick={handleDelete} />
+            <AddCircleIcon onClick={handleAdd} />
           </IconButton>
         </Tooltip>
         {numSelected > 0 ? (
@@ -254,7 +261,7 @@ export const EnhancedTableToolbar = (props) => {
                                   onChange={changeFilter(header.id, 'value')}
                                   size="small"
                                 />
-                              </Grid> ,
+                              </Grid>,
                               <Grid item xs={6} key={"h2" + index}>
                                 <InputLabel size="small" htmlFor={"filter2" + header.id}>{header.label}</InputLabel>
                                 <TextField
@@ -271,7 +278,7 @@ export const EnhancedTableToolbar = (props) => {
                           return (
                             <Grid item xs={11} key={"pick" + index}>
                               <FormControl fullWidth sx={{ m: 1}} variant="outlined">
-                                <InputLabel htmlFor={header.id}>Age</InputLabel>
+                                <InputLabel htmlFor={header.id}>{header.label}</InputLabel>
                                   <Select
                                     id={header.id}
                                     value={header.filter_details.value}

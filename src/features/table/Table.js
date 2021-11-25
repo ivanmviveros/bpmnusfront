@@ -12,9 +12,11 @@ import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
 import { styled } from '@mui/material/styles';
+import EditIcon from '@mui/icons-material/Edit';
 import { errorHandleDefault } from 'utils';
 import { getProjectsList } from './tableServices';
 import { 
+  changeCurrentView,
   enqueueSnackbar as enqueueSnackbarAction,
   setBackdropOpen
 } from 'features/frame/mainFrameSlice';
@@ -41,6 +43,9 @@ import {
 } from './tableSlice';
 import { EnhancedTableHead } from './TableHead';
 import { EnhancedTableToolbar } from './TableToolbar';
+import { IconButton } from '@mui/material';
+import { views } from 'views';
+import { setId } from 'features/projects/projectFormSlice';
 
 export default function EnhancedTable(props) {
     const order = useSelector(selectOrder)
@@ -56,7 +61,7 @@ export default function EnhancedTable(props) {
     const filter = useSelector(selectFilter)
     const dispatch = useDispatch();
     const enqueueSnackbar = (...args) => dispatch(enqueueSnackbarAction(...args));
-    const { tittle } = props;
+    const { title, addView } = props;
 
     const loadData = (data) => {
       return async (dispatch) => {
@@ -70,7 +75,7 @@ export default function EnhancedTable(props) {
           }
         )
         .catch(
-          (error) => errorHandleDefault(error, enqueueSnackbar)
+          (error) => errorHandleDefault(error, enqueueSnackbar, dispatch)
         )
         .finally(
           () => {
@@ -142,8 +147,12 @@ export default function EnhancedTable(props) {
             selected.slice(selectedIndex + 1),
           );
         }
-        console.log(newSelected);
         dispatch(setSelected(newSelected));
+    };
+
+    const handleClickEdit = (event, name) => {
+      dispatch(changeCurrentView(views.PROJECTS_FORM));
+      dispatch(setId(name));
     };
 
     const handleChangePage = (event, newPage) => {
@@ -177,7 +186,7 @@ export default function EnhancedTable(props) {
     return (
         <Box sx={{ width: '100%' }}>
         <Paper sx={{ width: '100%', mb: 2 }}>
-            <EnhancedTableToolbar numSelected={selected.length} tittle={tittle} />
+            <EnhancedTableToolbar numSelected={selected.length} title={title} addView={addView} />
             <TableContainer>
             <Table
                 sx={{ minWidth: 750 }}
@@ -219,7 +228,7 @@ export default function EnhancedTable(props) {
                             />
                         </TableCell>
                         {headers.map( (cell, index2) => {
-                          return index2 ==0 ? 
+                          return index2 == 0 ? 
                           <TableCell
                               component="th"
                               id={labelId}
@@ -236,6 +245,11 @@ export default function EnhancedTable(props) {
                             {row[cell.id]}
                           </TableCell>
                         })}
+                        <TableCell>
+                        <IconButton>
+                          <EditIcon onClick={(event) => handleClickEdit(event, row[headers[0].id])}/>
+                        </IconButton>
+                        </TableCell>
                         </StyledTableRow>
                     );
                     })}

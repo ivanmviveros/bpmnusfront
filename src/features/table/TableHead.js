@@ -56,6 +56,9 @@ export function EnhancedTableHead(props) {
             </TableSortLabel>
           </TableCell>
         ))}
+        <TableCell>
+          Acciones
+        </TableCell>
       </TableRow>
     </TableHead>
   );

@@ -1,3 +1,4 @@
+import axios from "axios";
 import { messages } from 'messages';
 import { 
     changeCurrentView
@@ -5,26 +6,53 @@ import {
 
 export const API_URL = "http://localhost:8000";
 
-export const errorHandleDefault = (error, enqueueSnackbar) => {
-    if (error.response){
-        const status = error.response.status;
-        let message;
-        if (status === 401) message = messages.LOGIN_REQUIRED
-        else if (status === 500) message = messages.INTERNAL_SERVER_ERROR
-        else if (status === 403) message = messages.ACCESS_DENIED
-        enqueueSnackbar({
-            key: new Date().getTime() + Math.random(),
-            message: message,
-            options: {
-                variant: 'error'
-            },
-            dismissed: false
-        });
-        if (status === 401) dispatch(changeCurrentView(views.LOGIN))
+/**
+ * @param {string} message 
+ * @param {string} variant - error, success
+ */
+export const createEqueue = (message, variant) => ({
+    key: new Date().getTime() + Math.random(),
+    message: message,
+    options: {
+        variant: variant
+    },
+    dismissed: false
+})
+
+export const errorHandleDefault = (response, enqueueSnackbar, dispatch) => {
+  let message;
+  const status = response.status;
+  console.log(status);
+  if (status === 400) return false;
+  else if (status === 401) message = messages.LOGIN_REQUIRED
+  else if (status === 500) message = messages.INTERNAL_SERVER_ERROR;
+  else if (status === 403) message = messages.ACCESS_DENIED;
+  else console.log(status);
+  if (message) enqueueSnackbar(createEqueue(message, 'error'));
+  if (status === 401) dispatch(changeCurrentView(views.LOGIN));
+  return true;
+}
+
+export const errorHandleForm = (response, enqueueSnackbar, formData, nonFieldErrorsMessage="") => {
+  formData = {...formData};
+  let message;
+  const error_data = response.data
+  if (error_data.non_field_errors) message = nonFieldErrorsMessage;
+  else {
+    message = "Error en los campos"
+    for (const property in error_data) {
+      formData = {
+        ...formData,
+        [property]: {
+          ...formData[property],
+          error: true,
+          helperText: error_data[property][0]
+        }
+      };
     }
-    else {
-        console.log('Aqui imprimo el error')
-    }
+  }
+  enqueueSnackbar(createEqueue(message, 'error'));
+  return formData;
 }
 
 const getCookie = (name) => {

@@ -23,8 +23,8 @@
             "name": "django",
             "type": "python",
             "request": "launch",
-            "program": "/Users/edgarceron/bpmnhu/manage.py",
-            "python": "/Users/edgarceron/bpmnhu/env/bin/python",
+            "program": "C:\\Users\\Edgar\\dev\\bpmnhu\\manage.py",
+            "python": "C:\\Users\\Edgar\\dev\\bpmnhu\\env\\Scripts\\python",
             "args": [
                 "runserver"
             ],

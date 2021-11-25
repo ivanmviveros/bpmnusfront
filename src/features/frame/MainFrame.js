@@ -13,6 +13,7 @@ import {LoginForm} from '../login/Login';
 import { getToken, getUserFromToken, userIsGuest, userIsLogged } from '../login/loginServices';
 import { setLoggedIn, setToken } from '../login/loginSlice'
 import { changeUserName, changeUserImage } from '../header/headerSlice'
+import { ProjectsForm } from 'features/projects/ProjectsForm';
 
 
 function renderSwitch(view){
@@ -23,6 +24,8 @@ function renderSwitch(view){
             return "Ajustes"
         case views.LOGIN:
             return <LoginForm />
+        case views.PROJECTS_FORM:
+            return <ProjectsForm />
     }
 }
 

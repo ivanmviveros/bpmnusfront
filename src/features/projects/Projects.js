@@ -1,6 +1,7 @@
 import React from 'react';
 import Grid  from '@mui/material/Grid';
-import EnhancedTable from '../table/Table';
+import { views } from 'views';
+import EnhancedTable from 'features/table/Table';
 import {setHeaders, setApiName} from '../table/tableSlice';
 import { useDispatch } from 'react-redux';
 
@@ -30,19 +31,9 @@ export function Projects(props) {
             label: 'Nombre',
             filterable: true,
             filter_details: {
-                type: "Picker", 
+                type: "Text", 
                 options: {
-                    "data_type": "text",
-                    picker_list: [
-                        {
-                            key: 1,
-                            label: '1'
-                        },
-                        {
-                            key: 2,
-                            label: '2'
-                        }
-                    ]
+                    "data_type": "text"
                 },
                 value: '',
                 value2: ''
@@ -88,7 +79,7 @@ export function Projects(props) {
     return (
         <Grid container>
             <Grid item xs={12} sx={{ my: 2 }}>
-                <EnhancedTable tittle="Proyectos" />
+                <EnhancedTable tittle="Proyectos" addView={views.PROJECTS_FORM} />
             </Grid>
         </Grid>
     )
