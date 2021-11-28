@@ -46,6 +46,7 @@ import { EnhancedTableToolbar } from './TableToolbar';
 import { IconButton } from '@mui/material';
 import { views } from 'views';
 import { setId } from 'features/projects/projectFormSlice';
+import { AccountTree } from '@mui/icons-material';
 
 export default function EnhancedTable(props) {
     const order = useSelector(selectOrder)
@@ -151,7 +152,14 @@ export default function EnhancedTable(props) {
     };
 
     const handleClickEdit = (event, name) => {
+      console.log(name);
       dispatch(changeCurrentView(views.PROJECTS_FORM));
+      dispatch(setId(name));
+    };
+
+    const handleClickBpmn = (event, name) => {
+      console.log(name);
+      dispatch(changeCurrentView(views.MODELER));
       dispatch(setId(name));
     };
 
@@ -246,9 +254,12 @@ export default function EnhancedTable(props) {
                           </TableCell>
                         })}
                         <TableCell>
-                        <IconButton>
-                          <EditIcon onClick={(event) => handleClickEdit(event, row[headers[0].id])}/>
-                        </IconButton>
+                          <IconButton onClick={(event) => handleClickEdit(event, row[headers[0].id])}>
+                            <EditIcon />
+                          </IconButton>
+                          <IconButton onClick={(event) => handleClickBpmn(event, row[headers[0].id])}>
+                            <AccountTree />
+                          </IconButton>
                         </TableCell>
                         </StyledTableRow>
                     );

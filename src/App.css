@@ -37,3 +37,6 @@
     transform: translateY(0px);
   }
 }
+
+@import url('http://127.0.0.1:8000/static/css/bpmn.css');
+@import url('http://127.0.0.1:8000/static/css/diagram-js.css');

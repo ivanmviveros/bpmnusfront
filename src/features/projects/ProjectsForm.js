@@ -5,9 +5,9 @@ import {
     setBackdropOpen,
     enqueueSnackbar as enqueueSnackbarAction
 } from 'features/frame/mainFrameSlice';
-import { errorHandleDefault, errorHandleForm } from 'utils';
+import { createEqueue, errorHandleDefault, errorHandleForm } from 'utils';
 import { selectFormData, selectId, setFormData, setId } from "./projectFormSlice"
-import { addProject, getProject } from "./projectsServices";
+import { addProject, getProject, replaceProject } from "./projectsServices";
 import { changeTittle } from "features/header/headerSlice";
 
 
@@ -35,9 +35,9 @@ export const ProjectsForm = () => {
             return async (dispatch) => {
                 await getProject(id)
                 .then((result) => {
-                    data = {
-                        name: {value: result.data.name, error: false, helperText: ""},
-                        desc: {value: result.data.desc, error: false, helperText: ""}
+                    const data = {
+                        name: {value: result.data.data.name, error: false, helperText: ""},
+                        desc: {value: result.data.data.desc, error: false, helperText: ""}
                     }
                     dispatch(setFormData(data));
                 })
@@ -66,6 +66,19 @@ export const ProjectsForm = () => {
         }
     }
 
+    const updatedFormData = (data) => {
+        return {
+            name: {
+                error: false, helperText: "",
+                value: data.name
+            },
+            desc: {
+                error: false, helperText: "",
+                value: data.desc
+            },
+        }
+    }
+
     const createProject = () => {
         dispatch(setBackdropOpen(true));
         return async (dispatch) => {
@@ -73,36 +86,42 @@ export const ProjectsForm = () => {
             await addProject(data)
             .then((result) => {
                 console.log(result);
-                enqueueSnackbar({
-                    key: new Date().getTime() + Math.random(),
-                    message: `Proyecto creado correctamente`,
-                    options: {
-                        variant: 'success'
-                    },
-                    dismissed: false
-                });
-                dispatch(setFormData({
-                    name: {
-                        value: '', error: false,
-                        value: data.name
-                    },
-                    desc: {
-                        value: '', error: false,
-                        value: data.desc
-                    },
-                })),
+                enqueueSnackbar(createEqueue(`Proyecto creado correctamente`, 'success'));
+                dispatch(setFormData(updatedFormData(data))),
                 dispatch(setId(result.data.id))
             })
             .catch((error) => {
                 if (error.response){
-                    const nonFieldErrorsMessage = "Nombre de usuario o contraseña incorrectos";
                     if (errorHandleDefault(error.response, enqueueSnackbar)) return;
-                    else dispatch(setFormData(errorHandleForm(error.response, enqueueSnackbar, formData, nonFieldErrorsMessage)));
+                    else dispatch(setFormData(errorHandleForm(error.response, enqueueSnackbar, formData)));
                 }
-                else {
-                    console.log('Aqui imprimo el error')
-                }
+                else console.log(error);
+                dispatch(setBackdropOpen(false));
+            })
+            .finally(() => {
                 dispatch(setBackdropOpen(false))
+            })
+        }
+    }
+
+    const updateProject = () => {
+        dispatch(setBackdropOpen(true));
+        return async (dispatch) => {
+            const data = formatForm()
+            await replaceProject(data, id)
+            .then((result) => {
+                console.log(result);
+                enqueueSnackbar(createEqueue(`Proyecto altualizado correctamente`, 'success'));
+                dispatch(setFormData(updatedFormData(data))),
+                dispatch(setId(result.data.id))
+            })
+            .catch((error) => {
+                if (error.response){
+                    if (errorHandleDefault(error.response, enqueueSnackbar)) return;
+                    else dispatch(setFormData(errorHandleForm(error.response, enqueueSnackbar, formData)));
+                }
+                else console.log(error);
+                dispatch(setBackdropOpen(false));
             })
             .finally(() => {
                 dispatch(setBackdropOpen(false))
@@ -111,7 +130,7 @@ export const ProjectsForm = () => {
     }
 
     const handleClick = () => {
-        dispatch(createProject());
+        id ? dispatch(updateProject()) : dispatch(createProject());
     }
     
     useEffect( () => {

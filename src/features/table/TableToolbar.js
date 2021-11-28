@@ -173,14 +173,14 @@ export const EnhancedTableToolbar = (props) => {
           </Typography>
         )}
         <Tooltip title="Add">
-          <IconButton>
-            <AddCircleIcon onClick={handleAdd} />
+          <IconButton onClick={handleAdd}>
+            <AddCircleIcon />
           </IconButton>
         </Tooltip>
         {numSelected > 0 ? (
           <Tooltip title="Delete">
-            <IconButton>
-              <DeleteIcon onClick={handleDelete} />
+            <IconButton onClick={handleDelete}>
+              <DeleteIcon />
             </IconButton>
           </Tooltip>
         ) : (
