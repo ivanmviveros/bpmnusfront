@@ -5,19 +5,24 @@ function loadError(onError) {
 }
 
 function ExternalScriptComponent() {
-  React.useEffect(() => {
-    const LoadExternalScript = () => {
-      const externalScript = document.createElement("script");
-      externalScript.onerror = loadError;
-      externalScript.id = "external";
-      externalScript.async = true;
-      externalScript.type = "text/javascript";
-      externalScript.setAttribute("crossorigin", "anonymous");
-      document.body.appendChild(externalScript);
-      externalScript.src = `http://127.0.0.1:8000/static/js/bpmn-modeler.development.js`;
+
+    const LoadBpmnScript = () => {
+        const externalScript = document.createElement("script");
+        externalScript.onerror = loadError;
+        externalScript.id = "bpmn-modeler.development";
+        externalScript.async = true;
+        externalScript.type = "text/javascript";
+        externalScript.setAttribute("crossorigin", "anonymous");
+        document.body.appendChild(externalScript);
+        externalScript.src = `http://127.0.0.1:8000/static/js/bpmn-modeler.development.js`;
+        externalScript.onload = () => {
+          document.body.appendChild(externalScript);
+        }
     };
-    LoadExternalScript();
-  }, []);
+
+    React.useEffect(() => {
+        LoadBpmnScript();
+    }, []);
 
   return <></>;
 }

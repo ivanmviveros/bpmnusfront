@@ -6,6 +6,7 @@ import tableReducer from "../features/table/tableSlice";
 import loginReducer from "../features/login/loginSlice";
 import counterReducer from "../features/counter/counterSlice";
 import projectFormReducer from "features/projects/projectFormSlice";
+import modelerReducer from "features/bpmn/modelerSlice";
 
 export const store = configureStore({
   reducer: {
@@ -14,7 +15,8 @@ export const store = configureStore({
     mainFrame: mainFrameReducer,
     table: tableReducer,
     login: loginReducer,
-    projectForm: projectFormReducer
+    projectForm: projectFormReducer,
+    modeler: modelerReducer
   },
   middleware: getDefaultMiddleware => getDefaultMiddleware().prepend(thunkMiddleware)
 });

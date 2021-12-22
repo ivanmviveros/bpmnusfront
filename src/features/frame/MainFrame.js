@@ -14,7 +14,7 @@ import { getToken, getUserFromToken, userIsGuest, userIsLogged } from '../login/
 import { setLoggedIn, setToken } from '../login/loginSlice'
 import { changeUserName, changeUserImage } from '../header/headerSlice'
 import { ProjectsForm } from 'features/projects/ProjectsForm';
-import BPMN from 'features/bpmn/BPMN';
+import Modeler from 'features/bpmn/Modeler';
 
 
 function renderSwitch(view){
@@ -28,7 +28,7 @@ function renderSwitch(view){
         case views.PROJECTS_FORM:
             return <ProjectsForm />
         case views.MODELER:
-            return <BPMN />
+            return <Modeler />
     }
 }
 
