@@ -5,16 +5,17 @@ import {
 } from 'features/frame/mainFrameSlice';
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { changeDiagramXML, selectDiagramXML, selectUrl } from './modelerSlice';
+import { changeDiagramXML, selectDiagramXML, selectSelectedItem, selectUrl, changeSelectedItem } from './modelerSlice';
 
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
+import PropertiesDrawer from './PropertiesDrawer';
 
 export default function BpmnModeler() {
     //const { url, diagramXML } = props;
     const diagramXML = useSelector(selectDiagramXML);
+    const selectedItem = useSelector(selectSelectedItem);
     const url = useSelector(selectUrl);
-    let [loaded, setLoaded] = useState(false);
     const dispatch = useDispatch();
     const enqueueSnackbar = (...args) => dispatch(enqueueSnackbarAction(...args));
     const containerRef = React.createRef();
@@ -30,8 +31,12 @@ export default function BpmnModeler() {
     
         fetch(url)
           .then(response => response.text())
-          .then(text => dispatch(changeDiagramXML(text)))
-          .catch(err => handleError(err));
+          .then(text => {
+              dispatch(changeDiagramXML(text))
+              displayDiagram(text)
+            })
+          .catch(err => handleError(err))
+          .finally( () => dispatch(setBackdropOpen(false)));
     }
 
     const handleLoading = () => {
@@ -80,43 +85,49 @@ export default function BpmnModeler() {
         });
         eventBus = bpmnViewer.get('eventBus');
         var events = [
-            'element.hover',
-            'element.out',
+            //'element.hover',
+            //'element.out',
             'element.click',
-            'element.dblclick',
-            'element.mousedown',
-            'element.mouseup'
+            //'element.dblclick',
+            //'element.mousedown',
+            //'element.mouseup'
         ];
-          
+
         events.forEach(function(event) {
             eventBus.on(event, function(e) {
                 console.log(event, 'on', e.element);
             });
         });
 
-        bpmnViewer.on('selection.change', function(e) {
-            console.log("a");
+        bpmnViewer.on('selection.changed', function(e) {
+            const newSelection = e.newSelection;
+            if (newSelection != undefined && newSelection.length == 1) dispatch(changeSelectedItem(newSelection[0].id));
+            else dispatch(changeSelectedItem(''));
         });
+
         bpmnViewer.on('element.changed', function(e) {
             console.log(e);
         });
 
         if (url) fetchDiagram(url);
-        if (diagramXML) displayDiagram(diagramXML);
-    }, [url, diagramXML]);
+        if (diagramXML != '') displayDiagram(diagramXML);
+    }, [url]);
 
 
     return (
-        <div className="react-bpmn-diagram-container" ref={ containerRef } style={
-            {
-                height: '800px',
-                width: '100%',
-                marginTop: '5px',
-                overflow: 'hidden',
-                padding: 0,
-                borderStyle: 'double'
-            }
-        }></div>
+        <div>
+            <div className="react-bpmn-diagram-container" ref={ containerRef } style={
+                {
+                    height: '800px',
+                    width: '100%',
+                    marginTop: '5px',
+                    overflow: 'hidden',
+                    padding: 0,
+                    borderStyle: 'double'
+                }
+            }></div>
+            <PropertiesDrawer selectedItem={selectedItem} />
+        </div>
     );
 
 } 

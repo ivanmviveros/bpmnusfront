@@ -1,35 +1,40 @@
 import * as React from 'react';
-import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
-import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
+import FormControl from '@mui/material/FormControl';
+import { useDispatch, useSelector } from 'react-redux';
 import { TextField } from '@mui/material';
+import { changeDiagramPropierties, selectDiagramPropierties } from './modelerSlice';
 
-export default function PropertiesDrawer() {
-    const show, setShow = React.useState(false);
 
-    const toggleDrawer = (open) => (event) => {
-        if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
-          return;
-        }
-        setShow(true);
-    };
+export default function PropertiesDrawer(props) {
+    const { selectedItem } = props;
+    const dispatch = useDispatch();
+    const diagramPropierties = useSelector(selectDiagramPropierties);
+    const name = diagramPropierties[selectedItem] ? diagramPropierties[selectedItem].name : '';
+    const desc = diagramPropierties[selectedItem] ? diagramPropierties[selectedItem].desc : '';
+    const anchor =  selectedItem == '' ? false : true;
+
+    const onChangeProp = (propierty) => (e) => {
+        dispatch(changeDiagramPropierties({
+            id: selectedItem,
+            propierty: propierty,
+            value: e.target.value
+        }))
+    }
 
     return (
         <div>
-            <Button onClick={toggleDrawer(anchor, true)}>{anchor}</Button>
             <Drawer
-                anchor={anchor}
-                open={state[anchor]}
-                onClose={toggleDrawer(anchor, false)}
+                anchor={'bottom'}
+                open={anchor}
+                variant="persistent"
             >
                 <FormControl sx={{ m: 1}} variant="outlined">
                     <TextField
                         id="outlined-multiline-static"
                         label="Nombre"
-                        defaultValue=""
+                        value={name}
+                        onChange={onChangeProp("name")}
                     />
                 </FormControl>
                 <FormControl sx={{ m: 1}} variant="outlined">
@@ -38,7 +43,8 @@ export default function PropertiesDrawer() {
                         label="Descripcion"
                         multiline
                         rows={2}
-                        defaultValue=""
+                        value={desc}
+                        onChange={onChangeProp("desc")}
                     />
                 </FormControl>
             </Drawer>

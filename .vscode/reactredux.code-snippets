@@ -15,17 +15,26 @@
 	// 	],
 	// 	"description": "Log output to console"
 	// }
-
 	"Reducer default" : {
 		"prefix": "reducer",
 		"body": [
-			"export const select${1} = (state) => state.modeler.${1/(.*)/${1:/downcase}/}"
+			"change${1/(.*)/${1:/pascalcase}/}: ",
+			"(state, action) => {",
+			"    state.${1/(.*)/${1:/camelcase}/} = action.payload; ",
+			"},"
 		]
 	},
+
 	"Selector default" : {
 		"prefix": "selector",
 		"body": [
-			"const ${1} = useSelector(select${1/(.*)/${1:/capitalize}/});"
+			"export const select${1/(.*)/${1:/pascalcase}/} = (state) => state.modeler.${1/(.*)/${1:/camelcase}/};"
+		]
+	},
+	"Use Selector default" : {
+		"prefix": "useselector",
+		"body": [
+			"const ${1/(.*)/${1:/camelcase}/} = useSelector(select${1/(.*)/${1:/pascalcase}/});"
 		]
 	}
 }
