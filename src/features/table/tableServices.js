@@ -1,11 +1,9 @@
 import axios from "axios";
 import { API_URL, getToken } from "utils";
 
-const APP = "projects";
-
-export const getProjectsList = (data) => {
+export const getList = (data, app) => {
   const token = getToken();
-  const url = `${API_URL}/${APP}/data_list`;
+  const url = `${API_URL}/${app}/data_list`;
   const headers = { Authorization: `Bearer ${token}` };
   axios.interceptors.response.use((response) => response, (error) => {
     return Promise.reject(error)
@@ -18,9 +16,9 @@ export const getProjectsList = (data) => {
   }
 };
 
-export const deleteBulk = (data) => {
+export const deleteBulk = (data, app) => {
   const token = getToken();
-  const url = `${API_URL}/${APP}/delete_bulk`;
+  const url = `${API_URL}/${app}/delete_bulk`;
   const headers = { Authorization: `Bearer ${token}` };
   axios.interceptors.response.use((response) => response, (error) => {
     return Promise.reject(error)

@@ -3,7 +3,7 @@ import Drawer from '@mui/material/Drawer';
 import FormControl from '@mui/material/FormControl';
 import { useDispatch, useSelector } from 'react-redux';
 import { TextField } from '@mui/material';
-import { changeDiagramPropierties, selectDiagramPropierties } from './modelerSlice';
+import { changeArtifactPropierties, selectDiagramPropierties } from './modelerSlice';
 
 
 export default function PropertiesDrawer(props) {
@@ -15,7 +15,7 @@ export default function PropertiesDrawer(props) {
     const anchor =  selectedItem == '' ? false : true;
 
     const onChangeProp = (propierty) => (e) => {
-        dispatch(changeDiagramPropierties({
+        dispatch(changeArtifactPropierties({
             id: selectedItem,
             propierty: propierty,
             value: e.target.value

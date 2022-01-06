@@ -15,6 +15,7 @@ import { setLoggedIn, setToken } from '../login/loginSlice'
 import { changeUserName, changeUserImage } from '../header/headerSlice'
 import { ProjectsForm } from 'features/projects/ProjectsForm';
 import Modeler from 'features/bpmn/Modeler';
+import { Diagrams } from 'features/diagrams/Diagrams';
 
 
 function renderSwitch(view){
@@ -29,6 +30,8 @@ function renderSwitch(view){
             return <ProjectsForm />
         case views.MODELER:
             return <Modeler />
+        case views.DIAGRAMS:
+            return <Diagrams />
     }
 }
 

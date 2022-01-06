@@ -1,5 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { getProjectsList } from './tableServices';
+import { createSlice } from '@reduxjs/toolkit';
 
 const rows = [];
 

@@ -12,11 +12,9 @@ import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
 import { styled } from '@mui/material/styles';
-import EditIcon from '@mui/icons-material/Edit';
 import { errorHandleDefault } from 'utils';
-import { getProjectsList } from './tableServices';
-import { 
-  changeCurrentView,
+import { getList } from './tableServices';
+import {
   enqueueSnackbar as enqueueSnackbarAction,
   setBackdropOpen
 } from 'features/frame/mainFrameSlice';
@@ -44,9 +42,6 @@ import {
 import { EnhancedTableHead } from './TableHead';
 import { EnhancedTableToolbar } from './TableToolbar';
 import { IconButton } from '@mui/material';
-import { views } from 'views';
-import { setId } from 'features/projects/projectFormSlice';
-import { AccountTree } from '@mui/icons-material';
 
 export default function EnhancedTable(props) {
     const order = useSelector(selectOrder)
@@ -62,13 +57,13 @@ export default function EnhancedTable(props) {
     const filter = useSelector(selectFilter)
     const dispatch = useDispatch();
     const enqueueSnackbar = (...args) => dispatch(enqueueSnackbarAction(...args));
-    const { title, addView } = props;
+    const { title, addView, actions } = props;
 
     const loadData = (data) => {
       return async (dispatch) => {
         dispatch(setBackdropOpen(true));
         dispatch(setLoading('loading'))
-        const response = await getProjectsList(data)
+        const response = await getList(data, apiName)
         .then(
           (restult) => {
             dispatch(setRows(restult.data.data))
@@ -151,17 +146,7 @@ export default function EnhancedTable(props) {
         dispatch(setSelected(newSelected));
     };
 
-    const handleClickEdit = (event, name) => {
-      console.log(name);
-      dispatch(changeCurrentView(views.PROJECTS_FORM));
-      dispatch(setId(name));
-    };
-
-    const handleClickBpmn = (event, name) => {
-      console.log(name);
-      dispatch(changeCurrentView(views.MODELER));
-      dispatch(setId(name));
-    };
+    
 
     const handleChangePage = (event, newPage) => {
         dispatch(setPage(newPage));
@@ -210,8 +195,6 @@ export default function EnhancedTable(props) {
                 rowCount={rows.length}
                 />
                 <TableBody>
-                {/* if you don't need to support IE11, you can replace the `stableSort` call with:
-                    rows.slice().sort(getComparator(order, orderBy)) */}
                 {rows.map((row, index) => {
                     const isItemSelected = isSelected(row[headers[0].id]);
                     const labelId = `enhanced-table-checkbox-${index}`;
@@ -226,41 +209,40 @@ export default function EnhancedTable(props) {
                           key={index}
                           selected={isItemSelected}
                         >
-                        <TableCell padding="checkbox">
-                            <Checkbox
-                            color="primary"
-                            checked={isItemSelected}
-                            inputProps={{
-                                'aria-labelledby': labelId,
-                            }}
-                            />
-                        </TableCell>
-                        {headers.map( (cell, index2) => {
-                          return index2 == 0 ? 
-                          <TableCell
-                              component="th"
-                              id={labelId}
-                              scope="row"
-                              padding="none"
-                              key= {'' + index + '-' + index2}
-                          >
-                            {row[cell.id]}
-                          </TableCell> :
-                          <TableCell 
-                            align="left"
-                            key= {'' + index + '-' + index2}
-                          >
-                            {row[cell.id]}
+                          <TableCell padding="checkbox">
+                              <Checkbox
+                              color="primary"
+                              checked={isItemSelected}
+                              inputProps={{
+                                  'aria-labelledby': labelId,
+                              }}
+                              />
                           </TableCell>
-                        })}
-                        <TableCell>
-                          <IconButton onClick={(event) => handleClickEdit(event, row[headers[0].id])}>
-                            <EditIcon />
-                          </IconButton>
-                          <IconButton onClick={(event) => handleClickBpmn(event, row[headers[0].id])}>
-                            <AccountTree />
-                          </IconButton>
-                        </TableCell>
+                          {headers.map( (cell, index2) => {
+                            return index2 == 0 ? 
+                            <TableCell
+                                component="th"
+                                id={labelId}
+                                scope="row"
+                                padding="none"
+                                key= {'' + index + '-' + index2}
+                            >
+                              {row[cell.id]}
+                            </TableCell> :
+                            <TableCell 
+                              align="left"
+                              key= {'' + index + '-' + index2}
+                            >
+                              {row[cell.id]}
+                            </TableCell>
+                          })}
+                          <TableCell>
+                            {actions.map( (i, index) => {
+                              return (<IconButton onClick={(event) => i.action(event, row[headers[0].id])} key={'action' + index}>
+                                <i.icon />
+                              </IconButton>)
+                            })}
+                          </TableCell>
                         </StyledTableRow>
                     );
                     })}

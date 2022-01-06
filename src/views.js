@@ -3,5 +3,6 @@ export const views = {
     PROJECTS_FORM: 'projectsForm',
     LOGIN: 'login',
     SETTINGS: 'settings',
-    MODELER: 'modeler'
+    MODELER: 'modeler',
+    DIAGRAMS: 'diagrams',
 }

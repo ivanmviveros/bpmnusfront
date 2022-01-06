@@ -1,29 +1,35 @@
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import BpmnJS from 'bpmn-js/dist/bpmn-modeler.production.min.js';
+import "bpmn-js/dist/assets/diagram-js.css";
+import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
+import { errorHandleDefault } from 'utils';
 import { 
     setBackdropOpen, 
     enqueueSnackbar as enqueueSnackbarAction,
 } from 'features/frame/mainFrameSlice';
-import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { changeDiagramXML, selectDiagramXML, selectSelectedItem, selectUrl, changeSelectedItem } from './modelerSlice';
-
-import "bpmn-js/dist/assets/diagram-js.css";
-import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
+import {
+    changeDiagramXML,
+    selectDiagramXML,
+    selectSelectedItem,
+    selectUrl,
+    changeSelectedItem
+} from './modelerSlice';
 import PropertiesDrawer from './PropertiesDrawer';
+import { uploadDiagram } from './modelerServices';
 
 export default function BpmnModeler() {
-    //const { url, diagramXML } = props;
     const diagramXML = useSelector(selectDiagramXML);
     const selectedItem = useSelector(selectSelectedItem);
     const url = useSelector(selectUrl);
     const dispatch = useDispatch();
     const enqueueSnackbar = (...args) => dispatch(enqueueSnackbarAction(...args));
     const containerRef = React.createRef();
-    let bpmnViewer = null;
+    let BpmnModeler = null;
     let eventBus = null;
 
     const displayDiagram = (diagramXML) => {
-        bpmnViewer.importXML(diagramXML);
+        BpmnModeler.importXML(diagramXML);
     }
     
     const fetchDiagram = (url) => {
@@ -67,23 +73,44 @@ export default function BpmnModeler() {
             dismissed: false
         });
     }
+    const saveUploadDiagram = () => {
+        dispatch(setBackdropOpen(true));
+        return async (dispatch) => {
+            const data = await BpmnModeler.saveXML({ format: true });
+            await uploadDiagram(data)
+            .then((result) => {
+                console.log(result);
+                enqueueSnackbar(createEqueue(`Diagrama guardado correctamente`, 'success'));
+            })
+            .catch((error) => {
+                if (error.response){
+                    if (errorHandleDefault(error.response, enqueueSnackbar)) return;
+                }
+                else console.log(error);
+                dispatch(setBackdropOpen(false));
+            })
+            .finally(() => {
+                dispatch(setBackdropOpen(false));
+            })
+        }
+    }
 
     React.useEffect(() => {
         const container = containerRef.current;
-        bpmnViewer = new BpmnJS({ 
+        BpmnModeler = new BpmnJS({ 
             container,
             keyboard: {
                 bindTo: document
             }
         });
 
-        bpmnViewer.on('import.done', (event) => {
+        BpmnModeler.on('import.done', (event) => {
             const { error, warnings  } = event;
             if (error) return handleError(error);
-            bpmnViewer.get('canvas').zoom('fit-viewport');
+            BpmnModeler.get('canvas').zoom('fit-viewport');
             return handleShown(warnings);
         });
-        eventBus = bpmnViewer.get('eventBus');
+        eventBus = BpmnModeler.get('eventBus');
         var events = [
             //'element.hover',
             //'element.out',
@@ -99,13 +126,13 @@ export default function BpmnModeler() {
             });
         });
 
-        bpmnViewer.on('selection.changed', function(e) {
+        BpmnModeler.on('selection.changed', function(e) {
             const newSelection = e.newSelection;
             if (newSelection != undefined && newSelection.length == 1) dispatch(changeSelectedItem(newSelection[0].id));
             else dispatch(changeSelectedItem(''));
         });
 
-        bpmnViewer.on('element.changed', function(e) {
+        BpmnModeler.on('element.changed', function(e) {
             console.log(e);
         });
 

@@ -18,8 +18,7 @@
 	"Reducer default" : {
 		"prefix": "reducer",
 		"body": [
-			"change${1/(.*)/${1:/pascalcase}/}: ",
-			"(state, action) => {",
+			"change${1/(.*)/${1:/pascalcase}/}: (state, action) => {",
 			"    state.${1/(.*)/${1:/camelcase}/} = action.payload; ",
 			"},"
 		]

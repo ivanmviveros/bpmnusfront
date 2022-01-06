@@ -32,7 +32,8 @@ import {
   setFilter,
   selectFilter,
   selectSelected,
-  setLoading
+  setLoading,
+  selectApiName
  } from 'features/table/tableSlice';
 import { deleteBulk } from './tableServices';
 import { resetState } from 'features/projects/projectFormSlice';
@@ -45,6 +46,7 @@ export const EnhancedTableToolbar = (props) => {
   const dispatch = useDispatch();
   const { numSelected, tittle, addView } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const apiName = useSelector(selectApiName);
   const enqueueSnackbar = (...args) => dispatch(enqueueSnackbarAction(...args));
 
   const handleClickFilterIcon = (event) => {
@@ -86,7 +88,7 @@ export const EnhancedTableToolbar = (props) => {
     return async (dispatch) => {
       dispatch(setBackdropOpen(true));
       dispatch(setLoading('loading'))
-      const response = await deleteBulk(selected)
+      const response = await deleteBulk(selected, apiName)
       .then(
         (restult) => {
           enqueueSnackbar({

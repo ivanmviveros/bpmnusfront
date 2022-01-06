@@ -1,23 +1,38 @@
 import React from 'react';
 import Grid  from '@mui/material/Grid';
+import { Edit } from '@mui/icons-material';
 import { views } from 'views';
 import EnhancedTable from 'features/table/Table';
 import {setHeaders, setApiName, setSelected} from '../table/tableSlice';
-import { useDispatch } from 'react-redux';
-import { AccountTree, Edit } from '@mui/icons-material';
-import { changeCurrentView } from 'features/frame/mainFrameSlice';
-import { setId } from './projectFormSlice';
-import { changeProject } from 'features/diagrams/diagramsSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { changeId } from 'features/bpmn/modelerSlice';
+import { selectProject } from './diagramsSlice';
 
-export function Projects(props) {
+export function Diagrams() {
     const dispatch = useDispatch();
-    const MODULE_NAME = "projects";
+    const project = useSelector(selectProject);
+    const MODULE_NAME = "diagrams";
     const HEADERS = [
         {
             id: 'id',
             numeric: false,
             disablePadding: true,
             label: 'Código',
+            filterable: true,
+            filter_details: {
+                type: "Text", //Text, Range, Picker
+                options: {
+                    "data_type": "number" //Min, Max range, picker_list, data_type (number, text, date)
+                },
+                value: '',
+                value2: ''
+            }
+        },
+        {
+            id: 'project',
+            numeric: false,
+            disablePadding: true,
+            label: 'Proyecto',
             filterable: true,
             filter_details: {
                 type: "Text", //Text, Range, Picker
@@ -74,39 +89,37 @@ export function Projects(props) {
             }
         },
     ];
+
     const handleClickEdit = (event, name) => {
-        console.log(name);
-        dispatch(changeCurrentView(views.PROJECTS_FORM));
-        dispatch(setId(name));
-    };
-  
-    const handleClickBpmn = (event, name) => {
-        console.log(name);
-        dispatch(changeProject(name));
-        dispatch(changeCurrentView(views.DIAGRAMS));
-    };
+        dispatch(changeCurrentView(views.MODELER));
+        dispatch(changeId(name));
+    }
 
     const actions = [
         {  
             'icon': Edit,
             'action': handleClickEdit
         },
-        {  
-            'icon': AccountTree,
-            'action': handleClickBpmn
-        },
     ]
-
+    
     React.useEffect(() => {
         dispatch(setApiName(MODULE_NAME));
-        dispatch(setHeaders(HEADERS));
+        dispatch(setHeaders(HEADERS.map((header) => {
+            return header.id != 'project' ? header : {
+                ...header,
+                filter_details: {
+                    ...header.filter_details,
+                    value: project
+                }
+            }
+        })));
         dispatch(setSelected([]));
-    }, []);
+    }, [project]);
     
     return (
         <Grid container>
             <Grid item xs={12} sx={{ my: 2 }}>
-                <EnhancedTable tittle="Proyectos" addView={views.PROJECTS_FORM} actions={actions} />
+                <EnhancedTable tittle="Diagramas" addView={views.MODELER} actions={actions} />
             </Grid>
         </Grid>
     )
