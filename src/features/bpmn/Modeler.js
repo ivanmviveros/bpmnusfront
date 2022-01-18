@@ -1,35 +1,63 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import BpmnJS from 'bpmn-js/dist/bpmn-modeler.production.min.js';
+import SaveIcon from '@mui/icons-material/Save';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
 import { errorHandleDefault } from 'utils';
 import { 
     setBackdropOpen, 
     enqueueSnackbar as enqueueSnackbarAction,
+    changeCurrentView,
 } from 'features/frame/mainFrameSlice';
 import {
     changeDiagramXML,
     selectDiagramXML,
     selectSelectedItem,
     selectUrl,
-    changeSelectedItem
+    changeSelectedItem,
+    selectName,
+    selectDesc,
+    changeName,
+    changeDesc,
+    selectDiagramPropierties,
+    selectId,
+    loadData,
+    changeId
 } from './modelerSlice';
 import PropertiesDrawer from './PropertiesDrawer';
-import { uploadDiagram } from './modelerServices';
+import { getDiagram, saveDiagram } from './modelerServices';
+import Fab from '@mui/material/Fab';
+import { selectProject } from 'features/diagrams/diagramsSlice';
+import { FormControl, TextField } from '@mui/material';
+import { views } from 'views';
+
 
 export default function BpmnModeler() {
     const diagramXML = useSelector(selectDiagramXML);
+    const name = useSelector(selectName);
+    const desc = useSelector(selectDesc);
     const selectedItem = useSelector(selectSelectedItem);
     const url = useSelector(selectUrl);
+    const id = useSelector(selectId);
     const dispatch = useDispatch();
     const enqueueSnackbar = (...args) => dispatch(enqueueSnackbarAction(...args));
     const containerRef = React.createRef();
-    let BpmnModeler = null;
+    const project = useSelector(selectProject);
+    const diagramPropierties = useSelector(selectDiagramPropierties);
+    const [ bpmnModeler, changeBpmnModeler] = useState(null);
+    const [ reload, changeReload] = useState(true);
     let eventBus = null;
 
-    const displayDiagram = (diagramXML) => {
-        BpmnModeler.importXML(diagramXML);
+    const displayDiagram = () => {
+        if (diagramXML == '') console.log('Vacio');
+        else bpmnModeler.importXML(diagramXML);
+    }
+
+    const onChangeProp = (propierty) => (e) => {
+        if (propierty == 'name') dispatch(changeName(e.target.value));
+        if (propierty == 'desc') dispatch(changeDesc(e.target.value));
     }
     
     const fetchDiagram = (url) => {
@@ -73,13 +101,15 @@ export default function BpmnModeler() {
             dismissed: false
         });
     }
+
     const saveUploadDiagram = () => {
         dispatch(setBackdropOpen(true));
         return async (dispatch) => {
-            const data = await BpmnModeler.saveXML({ format: true });
-            await uploadDiagram(data)
+            const data = await bpmnModeler.saveXML({ format: true });
+            await saveDiagram(id, data.xml, project, name, desc, diagramPropierties)
             .then((result) => {
-                console.log(result);
+                dispatch(changeReload(false));
+                dispatch(changeId(result.data.id));
                 enqueueSnackbar(createEqueue(`Diagrama guardado correctamente`, 'success'));
             })
             .catch((error) => {
@@ -95,54 +125,138 @@ export default function BpmnModeler() {
         }
     }
 
+    const handleClickSave = () => {
+        dispatch(saveUploadDiagram());
+    }
+
+    const handleClickReturn = () => {
+        dispatch(changeId(undefined));
+        dispatch(changeCurrentView(views.DIAGRAMS));
+    }
+
+    React.useEffect(() => {
+        if (bpmnModeler !== null){
+            bpmnModeler.on('import.done', (event) => {
+                const { error, warnings  } = event;
+                if (error) return handleError(error);
+                bpmnModeler.get('canvas').zoom('fit-viewport');
+                return handleShown(warnings);
+            });
+            eventBus = bpmnModeler.get('eventBus');
+            var events = [
+                //'element.hover',
+                //'element.out',
+                'element.click',
+                //'element.dblclick',
+                //'element.mousedown',
+                //'element.mouseup'
+            ];
+    
+            events.forEach(function(event) {
+                eventBus.on(event, function(e) {
+                    console.log(event, 'on', e.element);
+                });
+            });
+    
+            bpmnModeler.on('selection.changed', function(e) {
+                const newSelection = e.newSelection;
+                if (newSelection != undefined && newSelection.length == 1) dispatch(changeSelectedItem(newSelection[0].id));
+                else dispatch(changeSelectedItem(''));
+            });
+    
+            bpmnModeler.on('element.changed', function(e) {
+                console.log(e);
+            });
+    
+            if (url && id === undefined) fetchDiagram(url);
+            if (diagramXML !== '') displayDiagram();
+        }
+    }, [bpmnModeler, url, diagramXML]);
+
+    const getDiagramData = (id) => {
+        if (id !== undefined) {
+            dispatch(setBackdropOpen(true))
+            return async (dispatch) => {
+                await getDiagram(id)
+                .then((result) => {
+                    dispatch(loadData(result.data.data));
+                })
+                .catch((error) => {
+                    if (error.response){
+                        if (errorHandleDefault(error.response, enqueueSnackbar)) return;
+                    }
+                    else {
+                        console.log(console.error());
+                    }
+                })
+                .finally(() => {
+                    dispatch(setBackdropOpen(false))
+                })
+            }
+        }
+    }
+
+    React.useEffect( () => {
+        if (id !== undefined && reload) {
+            dispatch(getDiagramData(id));
+        } 
+    }, [id]);
+
     React.useEffect(() => {
         const container = containerRef.current;
-        BpmnModeler = new BpmnJS({ 
-            container,
-            keyboard: {
-                bindTo: document
-            }
-        });
+        changeBpmnModeler(
+            new BpmnJS({ 
+                container,
+                keyboard: {
+                    bindTo: document
+                }
+            })
+        );
+    }, []);
 
-        BpmnModeler.on('import.done', (event) => {
-            const { error, warnings  } = event;
-            if (error) return handleError(error);
-            BpmnModeler.get('canvas').zoom('fit-viewport');
-            return handleShown(warnings);
-        });
-        eventBus = BpmnModeler.get('eventBus');
-        var events = [
-            //'element.hover',
-            //'element.out',
-            'element.click',
-            //'element.dblclick',
-            //'element.mousedown',
-            //'element.mouseup'
-        ];
+    const baseFabStyle = {
+        position: 'absolute',
+        right: 50,
+    }
+    
+    const fabStyle = selectedItem == '' ? {
+        ...baseFabStyle,
+        bottom: 100,
+    } :
+    {
+        ...baseFabStyle,
+        top: 100,
+    }
 
-        events.forEach(function(event) {
-            eventBus.on(event, function(e) {
-                console.log(event, 'on', e.element);
-            });
-        });
-
-        BpmnModeler.on('selection.changed', function(e) {
-            const newSelection = e.newSelection;
-            if (newSelection != undefined && newSelection.length == 1) dispatch(changeSelectedItem(newSelection[0].id));
-            else dispatch(changeSelectedItem(''));
-        });
-
-        BpmnModeler.on('element.changed', function(e) {
-            console.log(e);
-        });
-
-        if (url) fetchDiagram(url);
-        if (diagramXML != '') displayDiagram(diagramXML);
-    }, [url]);
-
+    const fabStyle2 = selectedItem == '' ? {
+        ...baseFabStyle,
+        bottom: 40,
+    } :
+    {
+        ...baseFabStyle,
+        top: 160,
+    }
 
     return (
         <div>
+            <div>
+                <FormControl sx={{ m: 1, ml:0 }} variant="outlined">
+                    <TextField
+                        id="outlined-multiline-static"
+                        label="Nombre"
+                        value={name}
+                        onChange={onChangeProp("name")}
+                    />
+                </FormControl>
+                <FormControl sx={{ m: 1}} variant="outlined" >
+                    <TextField
+                        id="outlined-multiline-static"
+                        label="Descripcion"
+                        value={desc}
+                        onChange={onChangeProp("desc")}
+                    />
+                </FormControl>
+            </div>
             <div className="react-bpmn-diagram-container" ref={ containerRef } style={
                 {
                     height: '800px',
@@ -154,6 +268,14 @@ export default function BpmnModeler() {
                 }
             }></div>
             <PropertiesDrawer selectedItem={selectedItem} />
+            <Fab variant="extended" sx={fabStyle} aria-label={'Guardar'} color={'primary'} onClick={handleClickSave}>
+                <SaveIcon />
+                Guardar
+            </Fab>
+            <Fab variant="extended" sx={fabStyle2} aria-label={'Guardar'} color={'secondary'} onClick={handleClickReturn}>
+                <ArrowBackIcon />
+                Volver
+            </Fab>
         </div>
     );
 

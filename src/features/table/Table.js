@@ -37,7 +37,8 @@ import {
     selectRecords,
     selectHeaders,
     setLoading,
-    selectFilter
+    selectFilter,
+    selectReload
 } from './tableSlice';
 import { EnhancedTableHead } from './TableHead';
 import { EnhancedTableToolbar } from './TableToolbar';
@@ -55,9 +56,10 @@ export default function EnhancedTable(props) {
     const apiName = useSelector(selectApiName)
     const headers = useSelector(selectHeaders)
     const filter = useSelector(selectFilter)
+    const reload = useSelector(selectReload);
     const dispatch = useDispatch();
     const enqueueSnackbar = (...args) => dispatch(enqueueSnackbarAction(...args));
-    const { title, addView, actions } = props;
+    const { title, addView, actions, clean } = props;
 
     const loadData = (data) => {
       return async (dispatch) => {
@@ -105,8 +107,8 @@ export default function EnhancedTable(props) {
           "order": order,
           "orderBy": orderBy,
           "filters": getFilters(headers)
-        }))
-    }, [page, order, orderBy, rowsPerPage, apiName, filter, dispatch]);
+        }));
+    }, [reload, page, order, orderBy, rowsPerPage, apiName, filter]);
     
 
     const handleRequestSort = (event, property) => {
@@ -179,7 +181,7 @@ export default function EnhancedTable(props) {
     return (
         <Box sx={{ width: '100%' }}>
         <Paper sx={{ width: '100%', mb: 2 }}>
-            <EnhancedTableToolbar numSelected={selected.length} title={title} addView={addView} />
+            <EnhancedTableToolbar numSelected={selected.length} title={title} addView={addView} clean={clean} />
             <TableContainer>
             <Table
                 sx={{ minWidth: 750 }}

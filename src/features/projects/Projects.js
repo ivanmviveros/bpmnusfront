@@ -6,7 +6,7 @@ import {setHeaders, setApiName, setSelected} from '../table/tableSlice';
 import { useDispatch } from 'react-redux';
 import { AccountTree, Edit } from '@mui/icons-material';
 import { changeCurrentView } from 'features/frame/mainFrameSlice';
-import { setId } from './projectFormSlice';
+import { cleanProjectForm, setId } from './projectFormSlice';
 import { changeProject } from 'features/diagrams/diagramsSlice';
 
 export function Projects(props) {
@@ -106,7 +106,7 @@ export function Projects(props) {
     return (
         <Grid container>
             <Grid item xs={12} sx={{ my: 2 }}>
-                <EnhancedTable tittle="Proyectos" addView={views.PROJECTS_FORM} actions={actions} />
+                <EnhancedTable tittle="Proyectos" addView={views.PROJECTS_FORM} actions={actions} clean={cleanProjectForm} />
             </Grid>
         </Grid>
     )

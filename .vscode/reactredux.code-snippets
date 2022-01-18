@@ -27,7 +27,7 @@
 	"Selector default" : {
 		"prefix": "selector",
 		"body": [
-			"export const select${1/(.*)/${1:/pascalcase}/} = (state) => state.modeler.${1/(.*)/${1:/camelcase}/};"
+			"export const select${1/(.*)/${1:/pascalcase}/} = (state) => state.${2}.${1/(.*)/${1:/camelcase}/};"
 		]
 	},
 	"Use Selector default" : {

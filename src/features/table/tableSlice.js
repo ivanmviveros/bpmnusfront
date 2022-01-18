@@ -17,6 +17,7 @@ const initialState = {
     apiName: "",
     records: 0,
     filter: 0,
+    reload: false,
 };
 
 export const tableSlice = createSlice({
@@ -56,7 +57,10 @@ export const tableSlice = createSlice({
       },
       setFilter: (state, action) => {
         state.filter  = action.payload;
-      }
+      },
+      changeReload: (state, action) => {
+          state.reload = action.payload; 
+      },
     }
 });
 
@@ -72,7 +76,8 @@ export const {
     setRecords,
     setLoading,
     setApiName,
-    setFilter
+    setFilter,
+    changeReload
 } = tableSlice.actions;
 
 export const selectHeaders = (state) => state.table.headers;
@@ -87,5 +92,6 @@ export const selectLoading = (state) => state.table.loading;
 export const selectApiName = (state) => state.table.apiName;
 export const selectRecords = (state) => state.table.records;
 export const selectFilter = (state) => state.table.filter;
+export const selectReload = (state) => state.table.reload;
 
 export default tableSlice.reducer;

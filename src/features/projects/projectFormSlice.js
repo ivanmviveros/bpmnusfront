@@ -19,16 +19,19 @@ export const projectFormSlice = createSlice({
         setFormData: (state, action) => {
             state.formData = action.payload;
         },
-        resetState: (state, action) => {
-            state = {
-                ...state,
-                formData: { ...initialState.formData}
-            };
-        },
+        cleanProjectForm: (state, action) => {
+            state.id = undefined;
+            state.formData = initialState.formData;
+        }
     }
 });
 
-export const { setFormData, setId, resetState } = projectFormSlice.actions;
+export const { 
+    setFormData, 
+    setId, 
+    resetState,
+    cleanProjectForm
+} = projectFormSlice.actions;
 
 export const selectFormData = (state) => state.projectForm.formData;
 export const selectId = (state) => state.projectForm.id;

@@ -5,8 +5,9 @@ import { views } from 'views';
 import EnhancedTable from 'features/table/Table';
 import {setHeaders, setApiName, setSelected} from '../table/tableSlice';
 import { useDispatch, useSelector } from 'react-redux';
-import { changeId } from 'features/bpmn/modelerSlice';
+import { changeId, cleanModeler } from 'features/bpmn/modelerSlice';
 import { selectProject } from './diagramsSlice';
+import { changeCurrentView } from 'features/frame/mainFrameSlice';
 
 export function Diagrams() {
     const dispatch = useDispatch();
@@ -119,7 +120,7 @@ export function Diagrams() {
     return (
         <Grid container>
             <Grid item xs={12} sx={{ my: 2 }}>
-                <EnhancedTable tittle="Diagramas" addView={views.MODELER} actions={actions} />
+                <EnhancedTable tittle="Diagramas" addView={views.MODELER} actions={actions} clean={cleanModeler} />
             </Grid>
         </Grid>
     )

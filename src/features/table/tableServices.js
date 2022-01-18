@@ -24,7 +24,10 @@ export const deleteBulk = (data, app) => {
     return Promise.reject(error)
   })
   try {
-    return axios.delete(url, data, { headers: headers});
+    return axios.delete(url, {
+      headers: headers,
+      data: data
+    });
   }
   catch{
     return Promise.reject('A network error occurred. ')

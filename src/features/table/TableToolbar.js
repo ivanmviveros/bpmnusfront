@@ -33,7 +33,9 @@ import {
   selectFilter,
   selectSelected,
   setLoading,
-  selectApiName
+  selectApiName,
+  changeReload,
+  selectReload
  } from 'features/table/tableSlice';
 import { deleteBulk } from './tableServices';
 import { resetState } from 'features/projects/projectFormSlice';
@@ -44,9 +46,10 @@ export const EnhancedTableToolbar = (props) => {
   const filter = useSelector(selectFilter)
   const selected = useSelector(selectSelected)
   const dispatch = useDispatch();
-  const { numSelected, tittle, addView } = props;
+  const { numSelected, tittle, addView, clean } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const apiName = useSelector(selectApiName);
+  const reload = useSelector(selectReload);
   const enqueueSnackbar = (...args) => dispatch(enqueueSnackbarAction(...args));
 
   const handleClickFilterIcon = (event) => {
@@ -91,14 +94,16 @@ export const EnhancedTableToolbar = (props) => {
       const response = await deleteBulk(selected, apiName)
       .then(
         (restult) => {
+          const deleted = restult.data.objects_deleted[0];
           enqueueSnackbar({
             key: new Date().getTime() + Math.random(),
-            message: `Se eliminaron los registros ${restult.data.objects_deleted}`,
+            message: `Se eliminaron ${deleted} registros`,
             options: {
                 variant: 'success'
             },
             dismissed: false
           });
+          if(deleted > 0) dispatch(changeReload(!reload));
         }
       )
       .catch(
@@ -118,7 +123,7 @@ export const EnhancedTableToolbar = (props) => {
   }
 
   const handleAdd = () => {
-    dispatch(resetState(1));
+    dispatch(clean());
     dispatch(changeCurrentView(addView));
   }
 
