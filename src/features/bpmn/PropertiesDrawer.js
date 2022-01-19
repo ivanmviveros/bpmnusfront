@@ -2,12 +2,12 @@ import * as React from 'react';
 import Drawer from '@mui/material/Drawer';
 import FormControl from '@mui/material/FormControl';
 import { useDispatch, useSelector } from 'react-redux';
-import { TextField } from '@mui/material';
+import { TextField, Tooltip } from '@mui/material';
 import { changeArtifactPropierties, selectDiagramPropierties } from './modelerSlice';
 
 
 export default function PropertiesDrawer(props) {
-    const { selectedItem } = props;
+    const { selectedItem, updateSelectedLabel } = props;
     const dispatch = useDispatch();
     const diagramPropierties = useSelector(selectDiagramPropierties);
     const name = diagramPropierties[selectedItem] ? diagramPropierties[selectedItem].name : '';
@@ -19,7 +19,8 @@ export default function PropertiesDrawer(props) {
             id: selectedItem,
             propierty: propierty,
             value: e.target.value
-        }))
+        }));
+        if(propierty == 'name') updateSelectedLabel.f(e.target.value);
     }
 
     return (
@@ -30,14 +31,17 @@ export default function PropertiesDrawer(props) {
                 variant="persistent"
             >
                 <FormControl sx={{ m: 1}} variant="outlined">
-                    <TextField
-                        id="outlined-multiline-static"
-                        label="Nombre"
-                        value={name}
-                        onChange={onChangeProp("name")}
-                    />
+                    <Tooltip title="Normalmente un verbo en infinitivo" placement="top">
+                        <TextField
+                            id="outlined-multiline-static"
+                            label="Nombre"
+                            value={name}
+                            onChange={onChangeProp("name")}
+                        />
+                    </Tooltip>
                 </FormControl>
                 <FormControl sx={{ m: 1}} variant="outlined">
+                    <Tooltip title="Describa el proceso" placement="top">
                     <TextField
                         id="outlined-multiline-static"
                         label="Proposito"
@@ -46,6 +50,7 @@ export default function PropertiesDrawer(props) {
                         value={desc}
                         onChange={onChangeProp("desc")}
                     />
+                    </Tooltip>
                 </FormControl>
             </Drawer>
         </div>

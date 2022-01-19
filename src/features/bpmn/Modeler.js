@@ -22,7 +22,9 @@ import {
     changeId,
     selectId,
     setFormData,
-    selectFormData
+    selectFormData,
+    changeArtifactPropierties,
+    deleteArtifactPropierties
 } from './modelerSlice';
 import PropertiesDrawer from './PropertiesDrawer';
 import { getDiagram, saveDiagram } from './modelerServices';
@@ -46,7 +48,7 @@ export default function BpmnModeler() {
     const diagramPropierties = useSelector(selectDiagramPropierties);
     const [ bpmnModeler, changeBpmnModeler] = useState(null);
     const [ reload, changeReload] = useState(true);
-    let eventBus = null;
+    const [updateSelectedLabel, changeUpdateSelectedLabel] = useState({f: () => {}})
 
     const displayDiagram = () => {
         if (diagramXML == '') console.log('Vacio');
@@ -118,12 +120,10 @@ export default function BpmnModeler() {
                 enqueueSnackbar(createEqueue(`Diagrama guardado correctamente`, 'success'));
             })
             .catch((error) => {
-                if (error.response){
-                    if (errorHandleDefault(error.response, enqueueSnackbar)) return;
-                    else dispatch(setFormData(errorHandleForm(error.response, enqueueSnackbar, formData)));
-                }
-                else console.log(error);
-                dispatch(setBackdropOpen(false));
+                let defaultHadled = true
+                if (!error.response) console.log(error);
+                else defaultHadled = errorHandleDefault(error.response, enqueueSnackbar);
+                if (!defaultHadled) dispatch(setFormData(errorHandleForm(error.response, enqueueSnackbar, formData)));
             })
             .finally(() => {
                 dispatch(setBackdropOpen(false));
@@ -148,30 +148,27 @@ export default function BpmnModeler() {
                 bpmnModeler.get('canvas').zoom('fit-viewport');
                 return handleShown(warnings);
             });
-            eventBus = bpmnModeler.get('eventBus');
-            var events = [
-                //'element.hover',
-                //'element.out',
-                'element.click',
-                //'element.dblclick',
-                //'element.mousedown',
-                //'element.mouseup'
-            ];
-    
-            events.forEach(function(event) {
-                eventBus.on(event, function(e) {
-                    console.log(event, 'on', e.element);
-                });
-            });
-    
+            const modeling = bpmnModeler.get('modeling');
+            
             bpmnModeler.on('selection.changed', function(e) {
-                const newSelection = e.newSelection;
-                if (newSelection != undefined && newSelection.length == 1) dispatch(changeSelectedItem(newSelection[0].id));
-                else dispatch(changeSelectedItem(''));
+                let obj = {f: () => {}};
+                let element = {id: ''};
+                let newSelection = e.newSelection;
+                if(newSelection.length == 1) element = newSelection[0];
+                if(element.id != '') obj.f = (name) => modeling.updateLabel(element, name);
+                dispatch(changeSelectedItem(element.id));
+                changeUpdateSelectedLabel(obj);
             });
     
             bpmnModeler.on('element.changed', function(e) {
-                console.log(e);
+                if(!e.gfx && e.element.id) dispatch(deleteArtifactPropierties(e.element.id));
+                if(!e.element.businessObject) return;
+                const { id, name } = e.element.businessObject;
+                if (name != undefined && name != '') dispatch(changeArtifactPropierties({
+                    id: id,
+                    propierty: 'name',
+                    value: name
+                }))
             });
     
             if (url && id === undefined) fetchDiagram(url);
@@ -188,16 +185,10 @@ export default function BpmnModeler() {
                     dispatch(loadData(result.data.data));
                 })
                 .catch((error) => {
-                    if (error.response){
-                        if (errorHandleDefault(error.response, enqueueSnackbar)) return;
-                    }
-                    else {
-                        console.log(console.error());
-                    }
+                    if (!error.response) console.log(error);
+                    else (errorHandleDefault(error.response, enqueueSnackbar));
                 })
-                .finally(() => {
-                    dispatch(setBackdropOpen(false))
-                })
+                .finally(() => dispatch(setBackdropOpen(false)));
             }
         }
     }
@@ -278,7 +269,7 @@ export default function BpmnModeler() {
                     borderStyle: 'double'
                 }
             }></div>
-            <PropertiesDrawer selectedItem={selectedItem} />
+            <PropertiesDrawer selectedItem={selectedItem} updateSelectedLabel={updateSelectedLabel} />
             <Fab variant="extended" sx={fabStyle} aria-label={'Guardar'} color={'primary'} onClick={handleClickSave}>
                 <SaveIcon />
                 Guardar

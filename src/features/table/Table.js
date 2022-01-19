@@ -101,6 +101,7 @@ export default function EnhancedTable(props) {
     }
 
     React.useEffect(() => {
+        if (apiName == '') return;
         dispatch(loadData({ 
           "start": page * rowsPerPage,
           "length": rowsPerPage,

@@ -7,7 +7,7 @@ export const getList = (data, app) => {
   const headers = { Authorization: `Bearer ${token}` };
   axios.interceptors.response.use((response) => response, (error) => {
     return Promise.reject(error)
-  })
+  });
   try {
     return axios.post(url, data, { headers: headers});
   }

@@ -42,15 +42,8 @@ export const ProjectsForm = () => {
                     dispatch(setFormData(data));
                 })
                 .catch((error) => {
-                    if (error.response){
-                        const nonFieldErrorsMessage = "Nombre de usuario o contraseña incorrectos";
-                        if (errorHandleDefault(error.response, enqueueSnackbar)) return;
-                    }
-                    else {
-                        console.log('Aqui imprimo el error');
-                        console.log(console.error());
-                    }
-                    dispatch(setBackdropOpen(false))
+                    if (!error.response) console.log(error);
+                    else (errorHandleDefault(error.response, enqueueSnackbar));
                 })
                 .finally(() => {
                     dispatch(setBackdropOpen(false))

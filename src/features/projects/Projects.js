@@ -82,7 +82,6 @@ export function Projects(props) {
     };
   
     const handleClickBpmn = (event, name) => {
-        console.log(name);
         dispatch(changeProject(name));
         dispatch(changeCurrentView(views.DIAGRAMS));
         dispatch(changeTittle(`Listado de diagramas del proyecto ${name}`))

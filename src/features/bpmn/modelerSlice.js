@@ -10,7 +10,6 @@ const initialState = {
     url: 'http://localhost:8000/static/xml/start.bpmn.xml',
     selectedItem: '',
     diagramPropierties: {
-        
     }
 };
 
@@ -34,6 +33,11 @@ const modelerSlice = createSlice({
             if (state.diagramPropierties[elementId] === undefined)
                 state.diagramPropierties[elementId] = {}
             state.diagramPropierties[elementId][propierty] = value
+        },
+        deleteArtifactPropierties: (state, action) => {
+            const aux = { ...state.diagramPropierties };
+            delete aux[action.payload]
+            state.diagramPropierties = aux;
         },
         changeId: (state, action) => {
             state.id = action.payload; 
@@ -61,6 +65,9 @@ const modelerSlice = createSlice({
             state.selectedItem = ''; 
 
         },
+        changeSelectedItemName: (state, action) => {
+            state.selectedItem.businessObject.name = action.payload; 
+        },
     }
 });
 
@@ -72,7 +79,9 @@ export const {
     changeId,
     loadData,
     cleanModeler,
-    setFormData
+    setFormData,
+    changeSelectedItemName,
+    deleteArtifactPropierties
 } = modelerSlice.actions;
 
 export const selectDiagramXML = (state) => state.modeler.diagramXML;
