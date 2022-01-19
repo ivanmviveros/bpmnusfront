@@ -5,7 +5,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
-import { errorHandleDefault } from 'utils';
+import { errorHandleDefault, errorHandleForm } from 'utils';
 import { 
     setBackdropOpen, 
     enqueueSnackbar as enqueueSnackbarAction,
@@ -17,14 +17,12 @@ import {
     selectSelectedItem,
     selectUrl,
     changeSelectedItem,
-    selectName,
-    selectDesc,
-    changeName,
-    changeDesc,
     selectDiagramPropierties,
-    selectId,
     loadData,
-    changeId
+    changeId,
+    selectId,
+    setFormData,
+    selectFormData
 } from './modelerSlice';
 import PropertiesDrawer from './PropertiesDrawer';
 import { getDiagram, saveDiagram } from './modelerServices';
@@ -32,12 +30,12 @@ import Fab from '@mui/material/Fab';
 import { selectProject } from 'features/diagrams/diagramsSlice';
 import { FormControl, TextField } from '@mui/material';
 import { views } from 'views';
+import { changeTittle } from 'features/header/headerSlice';
 
 
 export default function BpmnModeler() {
     const diagramXML = useSelector(selectDiagramXML);
-    const name = useSelector(selectName);
-    const desc = useSelector(selectDesc);
+    const formData = useSelector(selectFormData);
     const selectedItem = useSelector(selectSelectedItem);
     const url = useSelector(selectUrl);
     const id = useSelector(selectId);
@@ -55,9 +53,14 @@ export default function BpmnModeler() {
         else bpmnModeler.importXML(diagramXML);
     }
 
-    const onChangeProp = (propierty) => (e) => {
-        if (propierty == 'name') dispatch(changeName(e.target.value));
-        if (propierty == 'desc') dispatch(changeDesc(e.target.value));
+    const onChangeProp = (prop) => (event) => {
+        dispatch(setFormData({
+            ...formData,
+            [prop]: {
+                ...formData[prop],
+                value: event.target.value
+            }
+        }))
     }
     
     const fetchDiagram = (url) => {
@@ -106,6 +109,8 @@ export default function BpmnModeler() {
         dispatch(setBackdropOpen(true));
         return async (dispatch) => {
             const data = await bpmnModeler.saveXML({ format: true });
+            const name = formData.name.value;
+            const desc = formData.desc.value;
             await saveDiagram(id, data.xml, project, name, desc, diagramPropierties)
             .then((result) => {
                 dispatch(changeReload(false));
@@ -115,6 +120,7 @@ export default function BpmnModeler() {
             .catch((error) => {
                 if (error.response){
                     if (errorHandleDefault(error.response, enqueueSnackbar)) return;
+                    else dispatch(setFormData(errorHandleForm(error.response, enqueueSnackbar, formData)));
                 }
                 else console.log(error);
                 dispatch(setBackdropOpen(false));
@@ -204,6 +210,7 @@ export default function BpmnModeler() {
 
     React.useEffect(() => {
         const container = containerRef.current;
+        dispatch(changeTittle("Editar diagrama"))
         changeBpmnModeler(
             new BpmnJS({ 
                 container,
@@ -244,7 +251,9 @@ export default function BpmnModeler() {
                     <TextField
                         id="outlined-multiline-static"
                         label="Nombre"
-                        value={name}
+                        value={formData.name.value}
+                        error={formData.name.error}
+                        helperText={formData.name.helperText}
                         onChange={onChangeProp("name")}
                     />
                 </FormControl>
@@ -252,7 +261,9 @@ export default function BpmnModeler() {
                     <TextField
                         id="outlined-multiline-static"
                         label="Descripcion"
-                        value={desc}
+                        value={formData.desc.value}
+                        error={formData.desc.error}
+                        helperText={formData.desc.helperText}
                         onChange={onChangeProp("desc")}
                     />
                 </FormControl>

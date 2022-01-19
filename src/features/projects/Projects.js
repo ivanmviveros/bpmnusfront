@@ -8,6 +8,7 @@ import { AccountTree, Edit } from '@mui/icons-material';
 import { changeCurrentView } from 'features/frame/mainFrameSlice';
 import { cleanProjectForm, setId } from './projectFormSlice';
 import { changeProject } from 'features/diagrams/diagramsSlice';
+import { changeTittle } from 'features/header/headerSlice';
 
 export function Projects(props) {
     const dispatch = useDispatch();
@@ -84,6 +85,7 @@ export function Projects(props) {
         console.log(name);
         dispatch(changeProject(name));
         dispatch(changeCurrentView(views.DIAGRAMS));
+        dispatch(changeTittle(`Listado de diagramas del proyecto ${name}`))
     };
 
     const actions = [
@@ -100,6 +102,7 @@ export function Projects(props) {
     React.useEffect(() => {
         dispatch(setApiName(MODULE_NAME));
         dispatch(setHeaders(HEADERS));
+        dispatch(changeTittle("Listado de proyectos"));
         dispatch(setSelected([]));
     }, []);
     

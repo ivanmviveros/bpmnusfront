@@ -22,7 +22,6 @@ export const createEqueue = (message, variant) => ({
 export const errorHandleDefault = (response, enqueueSnackbar, dispatch) => {
   let message;
   const status = response.status;
-  console.log(status);
   if (status === 400) return false;
   else if (status === 401) message = messages.LOGIN_REQUIRED
   else if (status === 500) message = messages.INTERNAL_SERVER_ERROR;

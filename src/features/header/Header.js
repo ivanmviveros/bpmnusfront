@@ -72,6 +72,11 @@ export function Header(props) {
         dispatch(changeCurrentView(views.LOGIN))
     }
 
+    const handleClickMenu = (view) => {
+        dispatch(changeCurrentView(view));
+        setOpen(false);
+    } 
+
     const menuItems = [
         {label: "Proyectos", icon: <FolderIcon />, view: views.PROJECTS}, 
         {label: "Ajustes", icon: <SettingsIcon />, view: views.SETTINGS}, 
@@ -101,7 +106,7 @@ export function Header(props) {
                         </IconButton>
                         
                         {menuItems.map((item, index) => (
-                            <ListItem button key={item.label} onClick={() => dispatch(changeCurrentView(item.view))}>
+                            <ListItem button key={item.label} onClick={() => handleClickMenu(item.view)}>
                             <ListItemIcon>
                                 {item.icon}
                             </ListItemIcon>

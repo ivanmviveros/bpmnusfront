@@ -40,7 +40,7 @@ export default function PropertiesDrawer(props) {
                 <FormControl sx={{ m: 1}} variant="outlined">
                     <TextField
                         id="outlined-multiline-static"
-                        label="Descripcion"
+                        label="Proposito"
                         multiline
                         rows={2}
                         value={desc}

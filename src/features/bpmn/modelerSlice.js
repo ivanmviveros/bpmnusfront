@@ -2,13 +2,15 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
     id: undefined,
-    name: '',
-    desc: '',
+    formData: {
+        name: {value: '', error: false, helperText: ""},
+        desc: {value: '', error: false, helperText: ""}
+    },
     diagramXML: '',
     url: 'http://localhost:8000/static/xml/start.bpmn.xml',
     selectedItem: '',
     diagramPropierties: {
-        'StartEvent_1': {}
+        
     }
 };
 
@@ -33,25 +35,26 @@ const modelerSlice = createSlice({
                 state.diagramPropierties[elementId] = {}
             state.diagramPropierties[elementId][propierty] = value
         },
-        changeName: (state, action) => {
-            state.name = action.payload; 
-        },
-        changeDesc: (state, action) => {
-            state.desc = action.payload; 
-        },
         changeId: (state, action) => {
             state.id = action.payload; 
         },
+        setFormData: (state, action) => {
+            state.formData = action.payload;
+        },
         loadData: (state, action) => {
-            state.name = action.payload.name;
-            state.desc = action.payload.desc;
+            state.formData = {
+                name: {value: action.payload.name, error: false, helperText: ""},
+                desc: {value: action.payload.desc, error: false, helperText: ""}
+            };
             state.diagramPropierties = JSON.parse(action.payload.propierties);
             state.diagramXML = action.payload.xml;
         },
         cleanModeler: (state, action) => {
             state.id = undefined;
-            state.name = '';
-            state.desc = '';
+            state.formData = {
+                name: {value: '', error: false, helperText: ""},
+                desc: {value: '', error: false, helperText: ""}
+            };
             state.diagramPropierties = {'StartEvent_1': {}};
             state.diagramXML = '';
             state.url = 'http://localhost:8000/static/xml/start.bpmn.xml';
@@ -67,18 +70,17 @@ export const {
     changeSelectedItem,
     changeArtifactPropierties,
     changeId,
-    changeName,
-    changeDesc,
     loadData,
-    cleanModeler
+    cleanModeler,
+    setFormData
 } = modelerSlice.actions;
 
 export const selectDiagramXML = (state) => state.modeler.diagramXML;
 export const selectUrl = (state) => state.modeler.url;
 export const selectSelectedItem = (state) => state.modeler.selectedItem;
 export const selectDiagramPropierties = (state) => state.modeler.diagramPropierties;
+export const selectFormData = (state) => state.modeler.formData;
 export const selectId = (state) => state.modeler.id;
-export const selectName = (state) => state.modeler.name;
 export const selectDesc = (state) => state.modeler.desc;
 
 export default modelerSlice.reducer;
