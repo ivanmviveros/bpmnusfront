@@ -2,6 +2,7 @@
   "name": "bpmhufront",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://localhost:80/bpmnus",
   "dependencies": {
     "@babel/core": "^7.16.12",
     "@date-io/date-fns": "^1.3.13",
