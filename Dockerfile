@@ -6,6 +6,4 @@ WORKDIR /bpmnusfront
 
 RUN npm i
 
-CMD ["npm", "run", "start"]
-
 EXPOSE 3000
