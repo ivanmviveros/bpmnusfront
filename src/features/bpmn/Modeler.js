@@ -27,12 +27,13 @@ import {
     deleteArtifactPropierties
 } from './modelerSlice';
 import PropertiesDrawer from './PropertiesDrawer';
-import { getDiagram, saveDiagram } from './modelerServices';
+import { generateUs, getDiagram, saveDiagram } from './modelerServices';
 import Fab from '@mui/material/Fab';
 import { selectProject } from 'features/diagrams/diagramsSlice';
 import { FormControl, TextField } from '@mui/material';
 import { views } from 'views';
 import { changeTittle } from 'features/header/headerSlice';
+import { AccountTree } from '@mui/icons-material';
 
 
 export default function BpmnModeler() {
@@ -107,6 +108,26 @@ export default function BpmnModeler() {
         });
     }
 
+    const generateUsDiagram = () => {
+        dispatch(setBackdropOpen(true));
+        return async (dispatch) => {
+            await generateUs(id)
+            .then((result) => {
+                console.log(result);
+                dispatch(changeId(result.data.id));
+                enqueueSnackbar(createEqueue(result.data.message, 'success'));
+            })
+            .catch((error) => {
+                let defaultHadled = true
+                if (!error.response) console.log(error);
+                else defaultHadled = errorHandleDefault(error.response, enqueueSnackbar);
+            })
+            .finally(() => {
+                dispatch(setBackdropOpen(false));
+            })
+        }
+    }
+
     const saveUploadDiagram = () => {
         dispatch(setBackdropOpen(true));
         return async (dispatch) => {
@@ -115,7 +136,7 @@ export default function BpmnModeler() {
             const desc = formData.desc.value;
             await saveDiagram(id, data.xml, project, name, desc, diagramPropierties)
             .then((result) => {
-                dispatch(changeReload(false));
+                changeReload(false);
                 dispatch(changeId(result.data.id));
                 enqueueSnackbar(createEqueue(`Diagrama guardado correctamente`, 'success'));
             })
@@ -131,9 +152,16 @@ export default function BpmnModeler() {
         }
     }
 
+
+
     const handleClickSave = () => {
         dispatch(saveUploadDiagram());
     }
+
+    const handleClickGenerate = () => {
+        dispatch(generateUsDiagram());
+    }
+    
 
     const handleClickReturn = () => {
         dispatch(changeId(undefined));
@@ -219,6 +247,15 @@ export default function BpmnModeler() {
     
     const fabStyle = selectedItem == '' ? {
         ...baseFabStyle,
+        bottom: 160,
+    } :
+    {
+        ...baseFabStyle,
+        top: 40,
+    }
+
+    const fabStyle2 = selectedItem == '' ? {
+        ...baseFabStyle,
         bottom: 100,
     } :
     {
@@ -226,7 +263,7 @@ export default function BpmnModeler() {
         top: 100,
     }
 
-    const fabStyle2 = selectedItem == '' ? {
+    const fabStyle3 = selectedItem == '' ? {
         ...baseFabStyle,
         bottom: 40,
     } :
@@ -274,7 +311,11 @@ export default function BpmnModeler() {
                 <SaveIcon />
                 Guardar
             </Fab>
-            <Fab variant="extended" sx={fabStyle2} aria-label={'Guardar'} color={'secondary'} onClick={handleClickReturn}>
+            <Fab variant="extended" sx={fabStyle2} aria-label={'Guardar'} color={'success'} onClick={handleClickGenerate}>
+                <AccountTree />
+                Generar historias
+            </Fab>
+            <Fab variant="extended" sx={fabStyle3} aria-label={'Guardar'} color={'secondary'} onClick={handleClickReturn}>
                 <ArrowBackIcon />
                 Volver
             </Fab>

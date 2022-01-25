@@ -29,3 +29,11 @@ export const getDiagram = (id) => {
     }
     return callApi(callback);
 }
+
+export const generateUs = (id) => {
+    const callback = (headers) => {
+        const url = `${API_URL}/${APP}/diagram_to_us/${id}`;
+        return axios.get(url, { headers: headers});
+    }
+    return callApi(callback);
+}
