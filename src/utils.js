@@ -4,7 +4,7 @@ import {
     changeCurrentView
 } from 'features/frame/mainFrameSlice';
 
-export const API_URL = process.env.API_HOST;
+export const API_URL = process.env.REACT_APP_API_HOST;
 
 /**
  * @param {string} message 

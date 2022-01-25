@@ -1,15 +1,12 @@
 
 import axios from 'axios';
 import { store } from '../../app/store';
-const API_URL = 'http://localhost:8000';
-const APP = "dj-rest-auth"
+import { API_URL } from "utils";
 
-const http = axios.create({
-    baseURL: "http://localhost:8080/api",
-    headers: {
-      "Content-type": "application/json"
-    }
-});
+const APP = "dj-rest-auth"
+const headers = {
+    "Content-type": "application/json"
+}
 
 
 export const tryLogin = (data) => {
@@ -18,7 +15,7 @@ export const tryLogin = (data) => {
         return Promise.reject(error)
     })
     try {
-        return http.post(url, data)
+        return axios.post(url, data, headers);
     }
     catch{
         return Promise.reject('A network error occurred. ')
@@ -32,7 +29,7 @@ export const getUserFromToken = async (token) => {
         return Promise.reject(error)
     })
     try {
-        const response = await http.post(url, data);
+        const response = await axios.post(url, data, headers);
         return response.data;
     }
     catch{
