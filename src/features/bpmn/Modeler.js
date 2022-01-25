@@ -114,7 +114,6 @@ export default function BpmnModeler() {
             await generateUs(id)
             .then((result) => {
                 console.log(result);
-                dispatch(changeId(result.data.id));
                 enqueueSnackbar(createEqueue(result.data.message, 'success'));
             })
             .catch((error) => {

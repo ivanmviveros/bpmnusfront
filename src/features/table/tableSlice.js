@@ -11,7 +11,7 @@ const initialState = {
     order: 'asc',
     orderBy: 'name',
     page: 0,
-    dense: false,
+    dense: true,
     rowsPerPage: 5,
     loading: 'idle',
     apiName: "",
