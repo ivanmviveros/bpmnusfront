@@ -27,6 +27,7 @@ export default function PropertiesDrawer(props) {
         }));
         if(propierty == 'name') updateSelectedLabel.f(e.target.value);
     }
+    
 
     return (
         <div>
