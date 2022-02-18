@@ -7,4 +7,4 @@ WORKDIR /bpmnusfront
 COPY buildfiles/.env.production.local /bpmnusfront/
 RUN npm install
 RUN npm run build
-EXPOSE 3000
+
