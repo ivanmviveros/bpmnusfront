@@ -1,4 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { API_URL } from "utils";
+
 
 const initialState = {
     id: undefined,
@@ -7,7 +9,7 @@ const initialState = {
         desc: {value: '', error: false, helperText: ""}
     },
     diagramXML: '',
-    url: 'http://localhost:8000/static/xml/start.bpmn.xml',
+    url: `${API_URL}/static/xml/start.bpmn.xml`,
     selectedItem: '',
     diagramPropierties: {
     }
@@ -61,7 +63,7 @@ const modelerSlice = createSlice({
             };
             state.diagramPropierties = {'StartEvent_1': {}};
             state.diagramXML = '';
-            state.url = 'http://localhost:8000/static/xml/start.bpmn.xml';
+            state.url = `${API_URL}/static/xml/start.bpmn.xml`;
             state.selectedItem = ''; 
 
         },

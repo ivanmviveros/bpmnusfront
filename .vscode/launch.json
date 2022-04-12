@@ -24,7 +24,7 @@
             "type": "python",
             "request": "launch",
             "program": "C:\\Users\\Edgar\\dev\\bpmnhu\\manage.py",
-            "python": "C:\\Users\\Edgar\\dev\\bpmnhu\\env\\Scripts\\python",
+            "python": "C:\\Users\\Edgar\\dev\\bpmnhu\\env\\Scripts\\python.exe",
             "args": [
                 "runserver"
             ],

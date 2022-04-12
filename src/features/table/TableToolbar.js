@@ -179,10 +179,10 @@ export const EnhancedTableToolbar = (props) => {
             {tittle}
           </Typography>
         )}
-        <Tooltip title="Add">
-          <IconButton onClick={handleAdd}>
-            <AddCircleIcon />
-          </IconButton>
+        <Tooltip title="Nuevo">
+          <Button variant="text" onClick={handleAdd} startIcon={<AddCircleIcon />} color="inherit">
+            Nuevo
+          </Button>
         </Tooltip>
         {numSelected > 0 ? (
           <Tooltip title="Delete">
@@ -196,9 +196,9 @@ export const EnhancedTableToolbar = (props) => {
           }) && 
           <div>
             <Tooltip title="Filtros">
-              <IconButton onClick={handleClickFilterIcon}>
-                <FilterListIcon/>
-              </IconButton>
+              <Button variant="text" onClick={handleClickFilterIcon} startIcon={<FilterListIcon />} color="inherit">
+                Filtrar
+              </Button>
             </Tooltip>       
             <Popper
               id={id}

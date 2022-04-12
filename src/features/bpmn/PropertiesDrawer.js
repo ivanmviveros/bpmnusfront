@@ -2,8 +2,7 @@ import * as React from 'react';
 import Drawer from '@mui/material/Drawer';
 import FormControl from '@mui/material/FormControl';
 import { useDispatch, useSelector } from 'react-redux';
-import { TextField, Tooltip, Grid, InputLabel, Select, MenuItem } from '@mui/material';
-
+import { TextField, Tooltip, Grid, InputLabel, Select, MenuItem, Button, Modal, Box, Typography } from '@mui/material';
 import { changeArtifactPropierties, selectDiagramPropierties } from './modelerSlice';
 
 
@@ -27,15 +26,93 @@ export default function PropertiesDrawer(props) {
         }));
         if(propierty == 'name') updateSelectedLabel.f(e.target.value);
     }
+
+    const style = {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: 400,
+        bgcolor: 'background.paper',
+        border: '2px solid #000',
+        boxShadow: 24,
+        p: 4,
+    };
     
+    const [open, setOpen] = React.useState(false);
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
+    
+    const boxStyle = {
+        backgroundColor: 'primary.dark',
+        border: 2
+    }
+
+    const boxStyleEven = {
+        backgroundColor: 'primary.light',
+        border: 2
+    }
+
+    const boxStyleOdd = {
+        backgroundColor: 'primary.main',
+        border: 2
+    }
+
+    const titleStyle = {color: 'white', marginLeft:5, fontWeight: 'bold'}
+    const valueStyle = { marginLeft:5, fontSize:18}
 
     return (
         <div>
+            <Modal
+                open={open}
+                onClose={handleClose}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+                <Grid container spacing={0} sx={boxStyle}>
+                    <Grid item xs={4}>
+                        <img src='http://127.0.0.1:8000/static/img/logo.gif' />
+                    </Grid>
+                    <Grid item xs={8}>
+                        <Grid container spacing={0}>
+                            <Grid item xs={12}><h3 style={{color: 'white'}}>Historia de usuario</h3></Grid>
+                            <Grid item xs={6} sx={boxStyleEven}><h3 style={titleStyle}>Código:</h3></Grid>
+                            <Grid item xs={6} sx={boxStyleEven}><span style={valueStyle}>{selectedItem}</span></Grid>
+                            <Grid item xs={6} sx={boxStyleOdd}><h3 style={titleStyle}>Prioridad:</h3></Grid>
+                            <Grid item xs={6} sx={boxStyleOdd}><span style={valueStyle}>{priority}</span></Grid>
+                            <Grid item xs={6} sx={boxStyleEven}><h3 style={titleStyle}>Puntos:</h3></Grid>
+                            <Grid item xs={6} sx={boxStyleEven}><span style={valueStyle}>{points}</span></Grid>
+                        </Grid>
+                    </Grid>
+                    <Grid item xs={12} sx={boxStyleOdd}>
+                        <h3 style={titleStyle}>Descripción:</h3>
+                        <span style={valueStyle}>{desc}</span>
+                    </Grid>
+                    <Grid item xs={12} sx={boxStyleEven}>
+                        <h3 style={titleStyle}>Restricciones:</h3>
+                        <span style={valueStyle}>{restrictions}</span>
+                    </Grid>
+                    <Grid item xs={12} sx={boxStyleOdd}>
+                        <h3 style={titleStyle}>Criterios de aceptación:</h3>
+                        <span style={valueStyle}>{criteria}</span>
+                    </Grid>
+                </Grid>
+            </Modal>
             <Drawer
                 anchor={'bottom'}
                 open={anchor}
                 variant="persistent"
             >
+                <Grid container spacing={0}>
+                    <Grid item xs={9}>
+
+                    </Grid>
+                    <Grid item xs={3} >
+                        <FormControl fullWidth sx={{ m: 1, width:"97%"}} variant="outlined">
+                            <Button variant="contained" onClick={handleOpen}>Previsualizar</Button>
+                        </FormControl>
+                    </Grid>
+                </Grid>
                 <Grid container spacing={1}>
                     <Grid item xs={6}>
                         <FormControl fullWidth sx={{ m: 1}} variant="outlined">
