@@ -5,7 +5,7 @@ import {
 } from 'features/frame/mainFrameSlice';
 
 export const API_URL = process.env.REACT_APP_API_HOST;
-
+export const STATIC_URL = process.env.REACT_APP_STATIC_URL;
 /**
  * @param {string} message 
  * @param {string} variant - error, success

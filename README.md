@@ -1,3 +1,26 @@
+
+## Local development
+
+1. set up local environment
+
+- create .env file at the project root, the same folder where package.json is located
+- add required variables to .env file like the example below, replace urls with bmpnus project host
+```
+BUILD_PATH='/usr/local/apache2/htdocs/'
+REACT_APP_API_HOST='http://127.0.0.1:8001'
+REACT_APP_STATIC_URL='http://127.0.0.1:8001/static'
+BROWSER=None
+```
+2. Start project
+### ```npm start```
+
+
+
+----
+----
+----
+
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app), using the [Redux](https://redux.js.org/) and [Redux Toolkit](https://redux-toolkit.js.org/) template.
 
 ## Available Scripts

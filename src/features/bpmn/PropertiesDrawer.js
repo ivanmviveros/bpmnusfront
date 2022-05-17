@@ -4,7 +4,7 @@ import FormControl from '@mui/material/FormControl';
 import { useDispatch, useSelector } from 'react-redux';
 import { TextField, Tooltip, Grid, InputLabel, Select, MenuItem, Button, Modal, Box, Typography } from '@mui/material';
 import { changeArtifactPropierties, selectDiagramPropierties } from './modelerSlice';
-
+import {STATIC_URL} from "../../utils";
 
 export default function PropertiesDrawer(props) {
     const { selectedItem, updateSelectedLabel } = props;
@@ -71,7 +71,7 @@ export default function PropertiesDrawer(props) {
             >
                 <Grid container spacing={0} sx={boxStyle}>
                     <Grid item xs={4}>
-                        <img src='http://127.0.0.1:8000/static/img/logo.gif' />
+                        <img src='{STATIC_URL}/img/logo.gif' />
                     </Grid>
                     <Grid item xs={8}>
                         <Grid container spacing={0}>
