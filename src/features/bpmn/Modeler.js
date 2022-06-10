@@ -34,6 +34,7 @@ import { FormControl, TextField } from '@mui/material';
 import { views } from 'views';
 import { changeTittle } from 'features/header/headerSlice';
 import { AccountTree } from '@mui/icons-material';
+import UserStoriesTable from "./UserStoriesTable";
 
 
 export default function BpmnModeler() {
@@ -48,6 +49,7 @@ export default function BpmnModeler() {
     const project = useSelector(selectProject);
     const diagramPropierties = useSelector(selectDiagramPropierties);
     const [ bpmnModeler, changeBpmnModeler] = useState(null);
+    const [ userStories, loadUserStories] = useState([{'title':"hu1"},{'title':"hu2"}, {'title':"hu3"}]);
     const [ reload, changeReload] = useState(true);
     const [updateSelectedLabel, changeUpdateSelectedLabel] = useState({f: () => {}})
 
@@ -305,6 +307,9 @@ export default function BpmnModeler() {
                     borderStyle: 'double'
                 }
             }></div>
+            <div>
+                <UserStoriesTable rows={userStories}/>
+            </div>
             <PropertiesDrawer selectedItem={selectedItem} updateSelectedLabel={updateSelectedLabel} />
             <Fab variant="extended" sx={fabStyle} aria-label={'Guardar'} color={'primary'} onClick={handleClickSave}>
                 <SaveIcon />
