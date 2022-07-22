@@ -37,3 +37,11 @@ export const generateUs = (id) => {
     }
     return callApi(callback);
 }
+
+export const getDiagramUserStories = (id) => {
+    const callback = (headers) => {
+        const url = `${API_URL}/${APP}/get_diagram_user_stories/?diagram_id=${id}`;
+        return axios.get(url, { headers: headers});
+    }
+    return callApi(callback);
+}

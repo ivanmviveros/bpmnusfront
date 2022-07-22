@@ -9,51 +9,42 @@ import Paper from '@mui/material/Paper';
 import TableHead from "@mui/material/TableHead";
 
 
-export default function UserStoriesTable({rows}){
-    //  (
-    //     <table className="table">
-    //         <thead>
-    //         <tr>
-    //             <th>"HU"</th>
-    //         </tr>
-    //         </thead>
-    //         <tbody>
-    //         {rows ? rows.map( (row, i) => {
-    //             return <tr>
-    //                 <td>
-    //                     {row.title}
-    //                 </td>
-    //             </tr>
-    //         }):""}
-    //         </tbody>
-    //     </table>
-    // )
-    //
+export default function UserStoriesTable({rows, handleRowSelected}){
     return (
         <Box sx={{ width: '100%' }}>
-            <Paper sx={{ width: '100%', mb: 20 }}>
+            <>
                 <TableContainer>
+                    <h3>Listado de historias de usuario</h3>
                     <Table
-                        sx={{ minWidth: 450 }}
+                        sx={{ minWidth: 200 }}
                         aria-labelledby="tableTitle"
                         size={'medium'}
                     >
                         <TableHead>
                             <TableRow sx={{ backgroundColor: "lightgray" }}>
                                 <TableCell>
+                                    {"Id"}
+                                </TableCell>
+                                <TableCell>
                                     {"Titulo"}
                                 </TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {rows.map((row, index) => {
+                            {rows.map((row) => {
                                 return (
                                     <TableRow
                                         hover
-                                        key={index}
+                                        key={row.id}
+                                        onClick={(e) => {
+                                            handleRowSelected(e, row.id)
+                                        }}
                                     >
+                                        <TableCell>
+                                            {row.data.id}
+                                        </TableCell>
                                          <TableCell>
-                                            {row.title}
+                                            {row.data.title}
                                          </TableCell>
                                     </TableRow>
                                 );
@@ -61,7 +52,7 @@ export default function UserStoriesTable({rows}){
                         </TableBody>
                     </Table>
                 </TableContainer>
-            </Paper>
+            </>
         </Box>
     );
 }

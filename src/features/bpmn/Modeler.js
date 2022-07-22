@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import BpmnJS from 'bpmn-js/dist/bpmn-modeler.production.min.js';
+import Modeler from 'bpmn-js/lib/Modeler.js';
 import SaveIcon from '@mui/icons-material/Save';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import "bpmn-js/dist/assets/diagram-js.css";
@@ -27,14 +28,16 @@ import {
     deleteArtifactPropierties
 } from './modelerSlice';
 import PropertiesDrawer from './PropertiesDrawer';
-import { generateUs, getDiagram, saveDiagram } from './modelerServices';
+import {generateUs, getDiagram, getDiagramUserStories, saveDiagram} from './modelerServices';
 import Fab from '@mui/material/Fab';
 import { selectProject } from 'features/diagrams/diagramsSlice';
-import { FormControl, TextField } from '@mui/material';
+import {Box, FormControl, Grid, Modal, TextField} from '@mui/material';
 import { views } from 'views';
 import { changeTittle } from 'features/header/headerSlice';
 import { AccountTree } from '@mui/icons-material';
 import UserStoriesTable from "./UserStoriesTable";
+import Button from "@mui/material/Button";
+import UserStoryDetail from "./UserStoryDetail";
 
 
 export default function BpmnModeler() {
@@ -49,9 +52,10 @@ export default function BpmnModeler() {
     const project = useSelector(selectProject);
     const diagramPropierties = useSelector(selectDiagramPropierties);
     const [ bpmnModeler, changeBpmnModeler] = useState(null);
-    const [ userStories, loadUserStories] = useState([{'title':"hu1"},{'title':"hu2"}, {'title':"hu3"}]);
     const [ reload, changeReload] = useState(true);
     const [updateSelectedLabel, changeUpdateSelectedLabel] = useState({f: () => {}})
+    const [ userStoriesData , setUserStoriesData] = useState([]);
+    const [ selectedUserStoryData , setSelectedUserStoryData] = useState({});
 
     const displayDiagram = () => {
         if (diagramXML == '') console.log('Vacio');
@@ -114,8 +118,13 @@ export default function BpmnModeler() {
         dispatch(setBackdropOpen(true));
         return async (dispatch) => {
             await generateUs(id)
-            .then((result) => {
+            .then(async (result) => {
                 console.log(result);
+                await getDiagramUserStories(id).then((res) => {
+                    const data = res.data;
+                    setUserStoriesData(data)
+                  }
+                );
                 enqueueSnackbar(createEqueue(result.data.message, 'success'));
             })
             .catch((error) => {
@@ -160,6 +169,7 @@ export default function BpmnModeler() {
     }
 
     const handleClickGenerate = () => {
+        setSelectedUserStoryData({})
         dispatch(generateUsDiagram());
     }
     
@@ -167,6 +177,13 @@ export default function BpmnModeler() {
     const handleClickReturn = () => {
         dispatch(changeId(undefined));
         dispatch(changeCurrentView(views.DIAGRAMS));
+    }
+
+    const handleRowSelected = (e, rowId) => {
+        const userStories = userStoriesData.filter((e) => e.id === rowId);
+        if (userStories.length != 1) return;
+        setSelectedUserStoryData(userStories[0].data)
+
     }
 
     React.useEffect(() => {
@@ -225,6 +242,11 @@ export default function BpmnModeler() {
     React.useEffect( () => {
         if (id !== undefined && reload) {
             dispatch(getDiagramData(id));
+            getDiagramUserStories(id).then((res) => {
+                  const data = res.data;
+                  setUserStoriesData(data)
+              }
+            );
         } 
     }, [id]);
 
@@ -232,7 +254,7 @@ export default function BpmnModeler() {
         const container = containerRef.current;
         dispatch(changeTittle("Editar diagrama"))
         changeBpmnModeler(
-            new BpmnJS({ 
+            new BpmnJS({
                 container,
                 keyboard: {
                     bindTo: document
@@ -273,30 +295,79 @@ export default function BpmnModeler() {
         top: 160,
     }
 
+    const [open, setOpen] = React.useState(false);
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
+
+    const modalStyle = {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: "70%",
+        bgcolor: 'background.paper',
+        border: '2px solid #000',
+        boxShadow: 24,
+        p: 4,
+        overflow:'scroll',
+        height:'80%',
+    };
+
     return (
         <div>
-            <div>
-                <FormControl sx={{ m: 1, ml:0 }} variant="outlined">
-                    <TextField
-                        id="outlined-multiline-static"
-                        label="Nombre"
-                        value={formData.name.value}
-                        error={formData.name.error}
-                        helperText={formData.name.helperText}
-                        onChange={onChangeProp("name")}
-                    />
-                </FormControl>
-                <FormControl sx={{ m: 1}} variant="outlined" >
-                    <TextField
-                        id="outlined-multiline-static"
-                        label="Descripcion"
-                        value={formData.desc.value}
-                        error={formData.desc.error}
-                        helperText={formData.desc.helperText}
-                        onChange={onChangeProp("desc")}
-                    />
-                </FormControl>
-            </div>
+            { userStoriesData.length != 0 && <Modal
+              open={open}
+              onClose={handleClose}
+            >
+                <Box sx={{ ...modalStyle, width: "80%"}}>
+                    <Grid container spacing={2}>
+                        <Grid item xs={6}>
+                            <Grid container >
+                                <UserStoriesTable rows={userStoriesData} handleRowSelected={handleRowSelected}/>
+                            </Grid>
+                        </Grid>
+                        { Object.keys(selectedUserStoryData).length > 0 &&
+                          <Grid item xs={6}>
+                              <UserStoryDetail {...selectedUserStoryData} />
+                          </Grid>
+                        }
+                    </Grid>
+                </Box>
+            </Modal>
+            }
+            <Grid container sx={{ mt: 1}} spacing={2}>
+                <Grid item xs={6}>
+                    <div>
+                        <FormControl sx={{ m: 1}} variant="outlined">
+                            <TextField
+                              id="outlined-multiline-static"
+                              label="Nombre"
+                              value={formData.name.value}
+                              error={formData.name.error}
+                              helperText={formData.name.helperText}
+                              onChange={onChangeProp("name")}
+                            />
+                        </FormControl>
+                        <FormControl sx={{ m: 1}} variant="outlined" >
+                            <TextField
+                              id="outlined-multiline-static"
+                              label="Descripcion"
+                              value={formData.desc.value}
+                              error={formData.desc.error}
+                              helperText={formData.desc.helperText}
+                              onChange={onChangeProp("desc")}
+                            />
+                        </FormControl>
+                    </div>
+                </Grid>
+                <Grid item xs={6}>
+                    {userStoriesData.length > 0 && <Fab variant="extended" aria-label={'Consultar historias'} color={'info'} onClick={handleOpen}>
+                        <AccountTree />
+                        Consultar historias
+                    </Fab>}
+                </Grid>
+            </Grid>
+
             <div className="react-bpmn-diagram-container" ref={ containerRef } style={
                 {
                     height: '800px',
@@ -307,23 +378,25 @@ export default function BpmnModeler() {
                     borderStyle: 'double'
                 }
             }></div>
-            <div>
-                <UserStoriesTable rows={userStories}/>
-            </div>
             <PropertiesDrawer selectedItem={selectedItem} updateSelectedLabel={updateSelectedLabel} />
             <Fab variant="extended" sx={fabStyle} aria-label={'Guardar'} color={'primary'} onClick={handleClickSave}>
                 <SaveIcon />
                 Guardar
             </Fab>
-            <Fab variant="extended" sx={fabStyle2} aria-label={'Guardar'} color={'success'} onClick={handleClickGenerate}>
-                <AccountTree />
-                Generar historias
-            </Fab>
+            <span style={fabStyle2}>
+                <Fab variant="extended"  aria-label={'Guardar'} color={'success'} onClick={handleClickGenerate}>
+                    <AccountTree />
+                    Generar historias
+                </Fab>
+                {userStoriesData.length > 0 && <Fab variant="extended" aria-label={'Consultar historias'} color={'info'} onClick={handleOpen}>
+                    <AccountTree />
+                    Consultar historias
+                </Fab>}
+            </span>
             <Fab variant="extended" sx={fabStyle3} aria-label={'Guardar'} color={'secondary'} onClick={handleClickReturn}>
                 <ArrowBackIcon />
                 Volver
             </Fab>
         </div>
     );
-
-} 
+}
