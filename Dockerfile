@@ -7,4 +7,4 @@ WORKDIR /bpmnusfront
 COPY ./package.json ./package.json
 RUN npm install
 COPY . .
-RUN npm run build
+RUN NODE_OPTIONS="--max-old-space-size=4096" npm run build
