@@ -8,7 +8,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import useNotifier from 'useNotifier';
 import { views } from 'views';
 import {Projects} from '../projects/Projects';
-import {selectCurrentView, selectBackdropOpen} from './mainFrameSlice';
+import {selectCurrentView, selectBackdropOpen, enqueueSnackbar, changeCurrentView} from './mainFrameSlice';
 import {LoginForm} from '../login/Login';
 import { getToken, getUserFromToken, userIsGuest, userIsLogged } from '../login/loginServices';
 import { setLoggedIn, setToken } from '../login/loginSlice'
@@ -16,7 +16,7 @@ import { changeUserName, changeUserImage } from '../header/headerSlice'
 import { ProjectsForm } from 'features/projects/ProjectsForm';
 import Modeler from 'features/bpmn/Modeler';
 import { Diagrams } from 'features/diagrams/Diagrams';
-
+import { messages } from 'messages';
 
 function renderSwitch(view){
     switch(view){

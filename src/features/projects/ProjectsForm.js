@@ -80,7 +80,7 @@ export const ProjectsForm = () => {
             .then((result) => {
                 console.log(result);
                 enqueueSnackbar(createEqueue(`Proyecto creado correctamente`, 'success'));
-                dispatch(setFormData(updatedFormData(data))),
+                dispatch(setFormData(updatedFormData(data)))
                 dispatch(setId(result.data.id))
             })
             .catch((error) => {
@@ -105,7 +105,7 @@ export const ProjectsForm = () => {
             .then((result) => {
                 console.log(result);
                 enqueueSnackbar(createEqueue(`Proyecto altualizado correctamente`, 'success'));
-                dispatch(setFormData(updatedFormData(data))),
+                dispatch(setFormData(updatedFormData(data)))
                 dispatch(setId(result.data.id))
             })
             .catch((error) => {
